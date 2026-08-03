@@ -1,10 +1,14 @@
+package gestion_partituras;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class LectorMusica {
-    public void leerMidXml() {
+	
+	private final String RUTA_SCRIPT_LECTORNOTAS_PY = "/tfg_java/Python/LectorNotas.py";
+	
+    public void leerMidXml(String rutaPartitura) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("python", "Python/LectorNotas.py", "Python/pruebamidi.mid"); // Ejecutar python, archivo python (sacador de notas), midi/xml a ver
+            ProcessBuilder pb = new ProcessBuilder("python3", RUTA_SCRIPT_LECTORNOTAS_PY, rutaPartitura); // Ejecutar python, archivo python (sacador de notas), midi/xml a ver
 
             Process process = pb.start();
 

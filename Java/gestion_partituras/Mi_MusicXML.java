@@ -5,11 +5,10 @@ public class Mi_MusicXML {
 	
 	
 	
-	public void 
 	
-	public void cambiar_nota(int pos_nota, NotaMusicXML nueva_nota) {
-		
-	}
+//	public void cambiar_nota(int pos_nota, NotaMusicXML nueva_nota) {
+//		
+//	}
 	
 	
 	//Funciones para editar la digitacion
