@@ -45,11 +45,12 @@ public class EmbajadorMusic21Python {
         
     }
     
-    public String digitaPartitura(JSONObject info_digitacion) {
+    public JSONObject digitaPartitura(JSONObject info_digitacion) {
+    	JSONObject infoNuevaPartitura = null;
     	String ruta_nuevo_archivo = null;
     	
     	//TODO: Hacer esto para comunicarse con python y que haga la digitacion
     	
-    	return ruta_nuevo_archivo;
+    	return infoNuevaPartitura;
     }
 }

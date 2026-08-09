@@ -51,7 +51,6 @@ public class Digitador {
 	
 	private static final int NUM_CUERDAS = 6;
 	
-//	private JSONArray arrayNotasActual;
 	
 	public PartituraDigitada digita(Partitura part) {
 		EmbajadorMusic21Python lector = new EmbajadorMusic21Python();
@@ -68,14 +67,6 @@ public class Digitador {
 	}
 	
 	private JSONObject digitacion_cuerda_traste_iter(JSONArray arrayNotas) {
-//		JSONArray notas = infoNotas.getJSONArray("notas");
-		 
-//		for(int i = 0; i < arrayNotasActual.length(); i++) {
-//			PosGuitarra[] candidatos = posiblesDigitaciones(notas.getString(i));
-//			for(PosGuitarra c : candidatos) {
-//				
-//			}
-//		}
 		
 		int n = arrayNotas.length();
 		

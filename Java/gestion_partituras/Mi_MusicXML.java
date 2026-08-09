@@ -3,6 +3,10 @@ package gestion_partituras;
 public class Mi_MusicXML {
 	private String ruta_archivo;
 	
+	public Mi_MusicXML(String rutaArchivo) {
+		ruta_archivo = rutaArchivo;
+	}
+	
 	
 	
 	
