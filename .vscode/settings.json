@@ -4,5 +4,6 @@
         "c:\\Users\\Eloy\\Desktop\\jackson-annotations-2.17.0.jar",
         "c:\\Users\\Eloy\\Desktop\\jackson-core-2.17.0.jar",
         "c:\\Users\\Eloy\\Desktop\\jackson-databind-2.17.0.jar"
-    ]
+    ],
+    "xml.downloadExternalResources.enabled": true
 }
