@@ -2,8 +2,7 @@ import json
 import sys
 import music21
 
-# Mapa global de enteros a números romanos (del 0 al 36) para trastes
-MAPA_ROMANOS = {
+MAPA_ROMANOS = { # Mapa global de enteros a numeros romanos (del 0 al 36), para la digitacion de los trastes
     0: "0",
     1: "I",
     2: "II",
@@ -52,9 +51,8 @@ def entero_a_romano(num):
     except (ValueError, TypeError):
         return str(num)
 
-
 def digitarPartitura():
-    # 1. Leer el JSON desde stdin enviado por Java
+    # 1. Leer el JSON desde stdin enviada por Java
     json_raw = sys.stdin.read()
 
     if not json_raw.strip():
@@ -68,30 +66,30 @@ def digitarPartitura():
         sys.exit(1)
 
     # 2. Extraer los datos del JSON
-    digitaciones = datosjson.get("digitaciones", [])
-    archivo_in = datosjson.get("archivo_in", "")
-    archivo_out = datosjson.get("archivo_out", "")
+    digitaciones = datosjson.get("digitaciones", []) # array de digitaciones de cada nota
+    archivo_in = datosjson.get("archivo_in", "") # ruta xml sin digitar
+    archivo_out = datosjson.get("archivo_out", "") # ruta xml digitado ya
 
-    if not archivo_in or not archivo_out or not digitaciones:
+    if not archivo_in or not archivo_out or not digitaciones: # puede no haber digitacion especificada
         print(
-            "Error: Las rutas archivo_in, archivo_out y digitaciones son obligatorias.",
+            "Error: Las rutas archivo_in y archivo_out son obligatorias y no pueden ser nulas.",
             file=sys.stderr,
         )
         sys.exit(1)
 
     try:
-        # 3. Cargar la partitura desde la ruta indicada en archivo_in
+        # 3. Cargar la partitura/archivo desde la ruta indicada en archivo_in
         score = music21.converter.parse(archivo_in)
 
         # 4. Recorrer las notas y acordes en orden secuencial
-        notas_y_acordes = score.recurse().notes
+        notas_y_acordes = score.recurse().notes # .notes recupera objetos Note y Chord, ignorando los silencios (Rest)
 
         idx_digitacion = 0
         total_digitaciones = len(digitaciones)
 
         for el in notas_y_acordes:
             if idx_digitacion >= total_digitaciones:
-                break
+                break  # Finaliza si no quedan mas digitaciones en el array
 
             val_digitacion = str(digitaciones[idx_digitacion])
 
@@ -103,39 +101,37 @@ def digitarPartitura():
             dedo_izq = partes[2] if len(partes) > 2 else ""
             dedo_der = partes[3] if len(partes) > 3 else ""
 
-            # 4.1. Cuerda: Número rodeado con círculo (debajo de la nota)
-            if cuerda and cuerda != "0":
+            # 4.1. Cuerda: Numero rodeado con circulo (debajo de la nota)
+            if cuerda:
                 try:
-                    str_ind = music21.articulations.Fingering(f"({cuerda})")
+                    str_ind = music21.expressions.StringIndication(int(cuerda))
                     str_ind.placement = "below"
-                    el.articulations.append(str_ind)
-                except Exception:
+                    el.expressions.append(str_ind)
+                except ValueError:
                     pass
 
-            # 4.2. Traste: Número romano según el mapa (encima de la nota)
-            if traste and traste.isdigit() and 1 <= int(traste) <= 36:
+            # 4.2. Traste: Numero romano segun el mapa (encima de la nota)
+            if traste and traste.isdigit() and 0 <= int(traste) <= 36:
                 traste_romano = entero_a_romano(traste)
-                fret_ind = music21.articulations.Fingering(traste_romano)
+                fret_ind = music21.expressions.FretIndication(traste_romano)
                 fret_ind.placement = "above"
-                el.articulations.append(fret_ind)
+                el.expressions.append(fret_ind)
 
-            # 4.3. Dedo Mano Izquierda: Número (encima de la nota)
-            if dedo_izq and dedo_izq != "0":
+            # 4.3. Dedo Mano Izquierda: Numero (encima a la derecha de la nota)
+            if dedo_izq:
                 fing_lh = music21.articulations.Fingering(dedo_izq)
                 fing_lh.placement = "above"
                 el.articulations.append(fing_lh)
 
-            # 4.4. Dedo Mano Derecha: p, i, m, a (debajo de la nota)
-            # Se usa TextExpression para p,i,m,a o Fingering
+            # 4.4. Dedo Mano Derecha: Numero (debajo a la derecha de la nota)
             if dedo_der:
-                fing_rh = music21.expressions.TextExpression(dedo_der)
+                fing_rh = music21.articulations.RightHandFingering(dedo_der)
                 fing_rh.placement = "below"
-                el.expressions.append(fing_rh)
+                el.articulations.append(fing_rh)
 
             idx_digitacion += 1
-
-        # 5. Guardar la partitura digitada
-        score.write(fp=archivo_out)
+        # 5. Guardar la partitura digitada en la ruta archivo_out
+        score.write(fp=archivo_out) # music21 detecta automaticamente el formato por la extension (.xml, .mxl, .mid, etc.)
         print(f"Exito: Archivo procesado y guardado en {archivo_out}")
 
     except Exception as e:
