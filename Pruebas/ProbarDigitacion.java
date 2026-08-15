@@ -13,13 +13,13 @@ public class ProbarDigitacion {
             "2,1,1,i",  // Cuerda 2, traste 1, dedo 1 izq, índice
             "3,2,2,m",  // Cuerda 3, traste 2, dedo 2 izq, medio
             "4,3,3,a",  // Cuerda 4, traste 3, dedo 3 izq, anular
-            "5,5,4,p"   // Cuerda 5, traste 5 (V romano), dedo 4 izq, pulgar
+            "5,5,4,p"   // Cuerda 5, traste 5, dedo 4 izq, pulgar
         };
 
         String archivoIn = "Python/pruebamidi_digitado.xml";  // Partitura sin digitar
         String archivoOut = "Python/pruebamidi_digitado2.xml"; // Partitura digitada
 
-        // 2. Construir el JSON manualmente para evitar dependencias de librerías externas
+        // 2. Construir el JSON manualmente para evitar dependencias de librerias externas
         String jsonInput = construirJson(digitaciones, archivoIn, archivoOut);
 
         System.out.println("--- ENVIANDO JSON A PYTHON ---");
@@ -28,7 +28,7 @@ public class ProbarDigitacion {
 
         // 3. Ejecutar el script de Python enviando el JSON por stdin
         try {
-            // Usar "python" o "python3" según la configuración del sistema
+            // Usar "python" o "python3" segun la configuración del sistema
             ProcessBuilder pb = new ProcessBuilder("python", "Python/DigitarPartitura.py");
             Process process = pb.start();
 

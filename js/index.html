@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizar partitura -Digitarra-</title>
+    <!-- Carga el JS guardado localmente en assets -->
+    <script src="opensheetmusicdisplay.min.js"></script>
+    <style>
+    body { margin: 0; background-color: white; }
+    #sheet-container { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div id="sheet-container"></div>
+
+    <script> // js
+    // Inicializar OSMD en el contenedor
+    const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay("sheet-container", {
+        autoResize: true,
+        drawTitle: true
+    });
+
+    // Función que llamaremos desde Java/Kotlin pasando el contenido del XML
+    function renderizarXmlLocal(xmlText) {
+        osmd.load(xmlText)
+        .then(() => osmd.render())
+        .catch(err => console.error("Error al renderizar:", err));
+    }
+    </script>
+</body>
+</html>
