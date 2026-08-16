@@ -12,6 +12,76 @@ import gestion_partituras.PartituraDigitada;
 
 public class Digitador {
 	
+	private class Dedo {
+		private int dedo_der;
+		private int dedo_izq;
+		
+		public Dedo(int d_i, int d_d) {
+			dedo_der = d_d;
+			dedo_izq = d_i;
+		}
+		
+
+		public int getDedo_der() {
+			return dedo_der;
+		}
+
+		public void setDedo_der(int dedo_der) {
+			this.dedo_der = dedo_der;
+		}
+
+		public int getDedo_izq() {
+			return dedo_izq;
+		}
+
+		public void setDedo_izq(int dedo_izq) {
+			this.dedo_izq = dedo_izq;
+		}
+		
+	}
+	
+	private static class PosGuitarra {
+		private int cuerda;
+		private int traste;
+		
+		public PosGuitarra(int cu, int tr) {
+			cuerda = cu;
+			traste = tr;
+		}
+
+		public int getCuerda() {
+			return cuerda;
+		}
+
+		public int getTraste() {
+			return traste;
+		}
+		
+		public void setTraste(int t) {
+			traste = t;
+		}
+		
+		public void setCuerda(int c) {
+			cuerda = c;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+	            return true;
+	        }
+
+	        if (!(obj instanceof PosGuitarra)) {
+	            return false;
+	        }
+	        
+	        PosGuitarra p = (PosGuitarra) obj;
+	        return this.cuerda == p.cuerda && this.traste == p.traste;
+		}
+		
+		
+	}
+	
 	private static final PosGuitarra[] cuerda_traste_do = {new PosGuitarra(2, 1), new PosGuitarra(5, 3),
 															new PosGuitarra(3, 5), new PosGuitarra(1, 8),
 															new PosGuitarra(6, 8), new PosGuitarra(4, 10)};
@@ -44,29 +114,159 @@ public class Digitador {
 															new PosGuitarra(3, 4), new PosGuitarra(1, 7),
 															new PosGuitarra(6, 7), new PosGuitarra(4, 9),
 															new PosGuitarra(2, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_do5 = {new PosGuitarra(1, 8)};
+	
+	private static final PosGuitarra[] cuerda_traste_do4 = {new PosGuitarra(2, 1), new PosGuitarra(3, 5), new PosGuitarra(4, 10)};
+	
+	private static final PosGuitarra[] cuerda_traste_do3 = {new PosGuitarra(5, 3), new PosGuitarra(6, 8)};
+	
+	private static final PosGuitarra[] cuerda_traste_re5 = {new PosGuitarra(1, 10)};
+	
+	private static final PosGuitarra[] cuerda_traste_re4 = {new PosGuitarra(2, 3), new PosGuitarra(3, 7), new PosGuitarra(4, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_re3 = {new PosGuitarra(4, 0), new PosGuitarra(5, 5), new PosGuitarra(6, 10)};
+	
+	private static final PosGuitarra[] cuerda_traste_mi5 = {new PosGuitarra(1, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_mi4 = {new PosGuitarra(1, 0), new PosGuitarra(2, 5), new PosGuitarra(3, 9)};
+	
+	private static final PosGuitarra[] cuerda_traste_mi3 = {new PosGuitarra(4, 2), new PosGuitarra(5, 7), new PosGuitarra(6, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_mi2 = {new PosGuitarra(6, 0)};
+	
+	private static final PosGuitarra[] cuerda_traste_fa4 = {new PosGuitarra(1, 1), new PosGuitarra(2, 6), new PosGuitarra(3, 10)};
 
-	private static final int PENALIZACION_GRAVEDAD = 0;
+	private static final PosGuitarra[] cuerda_traste_fa3 = {new PosGuitarra(4, 3), new PosGuitarra(5, 8)};
 	
-	private static final int NUM_TRASTES = 13;
+	private static final PosGuitarra[] cuerda_traste_fa2 = {new PosGuitarra(6, 1)};
 	
-	private static final int NUM_CUERDAS = 6;
+	private static final PosGuitarra[] cuerda_traste_sol4 = {new PosGuitarra(1, 3), new PosGuitarra(2, 8), new PosGuitarra(3, 12)};
+
+	private static final PosGuitarra[] cuerda_traste_sol3 = {new PosGuitarra(3, 0), new PosGuitarra(4, 5), new PosGuitarra(5, 10)};
+	
+	private static final PosGuitarra[] cuerda_traste_sol2 = {new PosGuitarra(6, 3)};
+	
+	private static final PosGuitarra[] cuerda_traste_la4 = {new PosGuitarra(1, 5), new PosGuitarra(2, 10)};
+	
+	private static final PosGuitarra[] cuerda_traste_la3 = {new PosGuitarra(3, 2), new PosGuitarra(4, 7), new PosGuitarra(5, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_la2 = {new PosGuitarra(5, 0), new PosGuitarra(6, 5)};
+	
+	private static final PosGuitarra[] cuerda_traste_si4 = {new PosGuitarra(1, 7), new PosGuitarra(2, 12)};
+	
+	private static final PosGuitarra[] cuerda_traste_si3 = {new PosGuitarra(2, 0), new PosGuitarra(3, 4), new PosGuitarra(4, 9)};
+	
+	private static final PosGuitarra[] cuerda_traste_si2 = {new PosGuitarra(5, 2), new PosGuitarra(6, 7)};
+	
+	private static final int NUM_TRASTES = 12; //Número de trastes a considerar en la programación dinámica. 
+	
+	private static final int NUM_CUERDAS = 6; //Número de cuerdas a considerar en la programación dinámica.
+
+	private static final int INICIO_FRANJA_ESTRECHA = 8; //Traste a partir del cual el espacio entre trastes es mas estrecho
+
+	private static final double COSTE_FRANJA_ESTRECHA = 1.5; //Espacio(en cm) entre trastes en la franja estrecha
+
+	private static final int INICIO_FRANJA_MEDIA = 5; //Traste a partir del cual el espacio entre trastes es medio, ni muy estrecho ni muy ancho
+
+	private static final double COSTE_FRANJA_MEDIA = 2.0; //Espacio(en cm) entre trastes en la franja media
+
+	private static final double COSTE_FRANJA_ANCHA = 3.0; //Espacio(en cm) entre trastes en la franja ancha
+	
+	private static final int ALTURA_INDICE_IZQUIERDO = 2; //Altura relativa del dedo índice de la mano izquierda al tocar la guitarra
+	
+	private static final int ALTURA_CORAZON_IZQUIERDO = 3; //Altura relativa del dedo corazón de la mano izquierda al tocar la guitarra
+	
+	private static final int ALTURA_ANULAR_IZQUIERDO = 2; //Altura relativa del dedo anular de la mano izquierda al tocar la guitarra
+	
+	private static final int ALTURA_MEÑIQUE_IZQUIERDO = 1; //Altura relativa del dedo meñique de la mano izquierda al tocar la guitarra
+	
+	private static final int MEÑIQUE_IZQUIERDO = 3; //Identificador del dedo meñique de la mano izquierda para la programación dinámica
+	
+	private static final int ANULAR_IZQUIERDO = 2; //Identificador del dedo anular de la mano izquierda para la programación dinámica
+	
+	private static final int CORAZON_IZQUIERDO = 1; //Identificador del dedo corazon de la mano izquierda para la programación dinámica
+	
+	private static final int INDICE_IZQUIERDO = 0; //Identificador del dedo indice de la mano izquierda para la programación dinámica
+
+	private static final double PENALIZACION_MEÑIQUE_ALTO = 1.5; //Factor de penalización aplicado al coste al tener que subir demasiado el meñique
+	
+	private static final int ALTURA_PULGAR_DERECHO = 5; //Altura relativa del dedo pulgar de la mano derecha al tocar la guitarra
+	
+	private static final int ALTURA_INDICE_DERECHO = 4; //Altura relativa del dedo índice de la mano derecha al tocar la guitarra
+	
+	private static final int ALTURA_CORAZON_DERECHO = 3; //Altura relativa del dedo corazón de la mano derecha al tocar la guitarra
+	
+	private static final int ALTURA_ANULAR_DERECHO = 2; //Altura relativa del dedo anular de la mano derecha al tocar la guitarra
+	
+	private static final int ALTURA_MEÑIQUE_DERECHO = 1; //Altura relativa del dedo meñique de la mano derecha al tocar la guitarra
+	
+	private static final int PULGAR_DERECHO = 4; //Identificador del dedo pulgar de la mano derecha para la programación dinámica
+	
+	private static final int INDICE_DERECHO = 3; //Identificador del dedo indice de la mano derecha para la programación dinámica
+	
+	private static final int CORAZON_DERECHO = 2; //Identificador del dedo corazon de la mano derecha para la programación dinámica
+	
+	private static final int ANULAR_DERECHO = 1; //Identificador del dedo anular de la mano derecha para la programación dinámica
+	
+	private static final int MEÑIQUE_DERECHO = 0; //Identificador del dedo meñique de la mano derecha para la programación dinámica
+
+	private static final char CARACTER_PULGAR = 'p'; //Carácter del dedo pulgar para anotar directamente en la partitura en pdf
+
+	private static final char CARACTER_INDICE = 'i'; //Carácter del dedo indice para anotar directamente en la partitura en pdf
+
+	private static final char CARACTER_CORAZON = 'c'; //Carácter del dedo corazon para anotar directamente en la partitura en pdf
+
+	private static final char CARACTER_ANULAR = 'a'; //Carácter del dedo anular para anotar directamente en la partitura en pdf
+
+	private static final char CARACTER_MEÑIQUE = 'm'; //Carácter del dedo meñique para anotar directamente en la partitura en pdf
+
+	private static final char CARACTER_DEDO_DESCONOCIDO = '?'; //Carácter para cuando no se reconoce el dedo de la digitacion.
 	
 	
-	public PartituraDigitada digita(Partitura part) {
+	/**
+	 * Funcion que genera la mejor digitacion posible para una partitura dada, usando programación dinámica.
+	 * 
+	 * Una vez la calcula, llama al embajador para que haga las anotaciones en el archivo MusicXML 
+	 * y devuelva la ruta del nuevo archivo MusicXML con la digitacion. Tras ello crea un nuevo objeto PartituraDigitada y lo devuelve.
+	 * 
+	 * @param partitura Partitura de guitarra que no ha sido digitada.
+	 * @return instancia de {@link PartituraDigitada} con la partitura digitada.
+	 */
+	public JSONObject digita(Partitura partitura) throws NotaDesconocidaException {
 		EmbajadorMusic21Python lector = new EmbajadorMusic21Python();
+			
+		JSONObject json_in = lector.getNotas(partitura.getPartitura_Midi().getRuta());
 		
-		JSONObject json_in = lector.getNotas(part.getPartitura_Midi().getRuta());
+//		JSONObject json_out = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
 		
-		JSONObject json_out = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
+		PosGuitarra[] cuerda_traste_mejor = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
 		
-		String ruta_nuevo_archivo = lector.digitaPartitura(json_out);
+		Dedo[] dedos_mejor = digitacion_dedos_iter(json_in.getJSONArray("notas"), cuerda_traste_mejor);
 		
-		PartituraDigitada part_n = new PartituraDigitada(ruta_nuevo_archivo);
+		JSONObject resul = this.objetoDigitacionSalida(cuerda_traste_mejor, dedos_mejor, 33, dedos_mejor.length, "/home/Curso2526/TFG/PartiturasDigitadas/"+partitura.getNombre_partitura()+".mxl");
 		
-		return part_n;
+//		String ruta_nuevo_archivo = lector.digitaPartitura(json_out);
+//		
+//		PartituraDigitada part_n = new PartituraDigitada(ruta_nuevo_archivo);
+//		
+//		return part_n;
+		return resul;
 	}
 	
-	private JSONObject digitacion_cuerda_traste_iter(JSONArray arrayNotas) {
+	/*
+	 * 
+	 * FUNCIONES PARA DIGITACION CUERDA-TRASTE
+	 */
+	
+	/**
+	 * Función auxiliar que genera la mejor digitación de cuerda y traste para tocar cada nota de una partitura, usando programación dinámica de 
+	 * forma iterativa, rellenando la matriz
+	 * hacia atrás.
+	 * @param arrayNotas {@link JSONArray} que contiene las notas de la partitura a digitar
+	 * @return Array de Cuerda y traste con los que tocar cada nota haciendo el coste mínimo.
+	 */
+	private PosGuitarra[] digitacion_cuerda_traste_iter(JSONArray arrayNotas) {
 		
 		int n = arrayNotas.length();
 		
@@ -112,7 +312,7 @@ public class Digitador {
 		
 		//Recolectar el mejor camino.
 		
-		for(int i = 0; i < arrayNotas.length(); i++) {
+		for(int i = 0; i < arrayNotas.length() - 1; i++) {
 			PosGuitarra[] posibles_nota_i = posiblesDigitaciones(arrayNotas.getString(i));
 			int mejorCoste = Integer.MAX_VALUE;
 			PosGuitarra mejorDig_i = null;
@@ -128,14 +328,31 @@ public class Digitador {
 			mejorDigitacion[i] = mejorDig_i;
 		}
 		
+		PosGuitarra[] posibles_ultima = posiblesDigitaciones(arrayNotas.getString(n-1));
+		int mejorAux = Integer.MAX_VALUE;
+		for(int i = 0; i < posibles_ultima.length; i++) {
+			
+			int aux = coste(mejorDigitacion[n-2], posibles_ultima[i]);
+			if(aux < mejorAux) {
+				mejorAux = aux;
+				mejorDigitacion[n-1] = posibles_ultima[i];
+			}
+		}
 		
 		
-		JSONObject json_digit = this.objetoDigitacionSalida(mejorDigitacion, matrizCoste[0][mejorDigitacion[0].getCuerda()][mejorDigitacion[0].getTraste()], n);
 		
-		return json_digit;
+		
+		return mejorDigitacion;
 		
 	}
 	
+	
+	/**
+	 * Función auxiliar que calcula el coste de pasar de una posición(Cuerda y traste) a otra en una guitarra, dado:
+	 * @param posini Posición en la guitarra de la que se parte
+	 * @param posfin Posición en la guitarra a la que se pretende mover la mano.
+	 * @return Coste de moverse de una posicion a otra en la guitarra
+	 */
 	private int coste(PosGuitarra posini, PosGuitarra posfin) {
 		int resul = 0;
 		
@@ -164,50 +381,494 @@ public class Digitador {
 		return resul;
 	}
 	
+	/**
+	 * Función auxiliar que dado un string de una nota, devuelve las posibles Posiciones(Cuerda y traste) en las que se puede tocar dicha nota,
+	 * @param nota String con el nombre de la nota
+	 * @return Posibles Posiciones donde tocar la nota dada.
+	 */
+	private PosGuitarra[] posiblesDigitaciones(String nota) throws NotaDesconocidaException{
+		
+		
+//		if(nota.equalsIgnoreCase("do")) {
+//			return cuerda_traste_do;
+//		}
+//		else if(nota.equalsIgnoreCase("re")) {
+//			return cuerda_traste_re;
+//		}
+//		else if(nota.equalsIgnoreCase("mi")) {
+//			return cuerda_traste_mi;
+//		}
+//		else if(nota.equalsIgnoreCase("fa")) {
+//			return cuerda_traste_fa;
+//		}
+//		else if(nota.equalsIgnoreCase("sol")) {
+//			return cuerda_traste_sol;
+//		}
+//		else if(nota.equalsIgnoreCase("la")) {
+//			return cuerda_traste_la;
+//		}
+//		else if(nota.equalsIgnoreCase("si")) {
+//			return cuerda_traste_si;
+//		}
+//		else {
+//			System.out.println("Esto no es una nota");
+//			return null;
+//		}
+		
+		boolean esBemol = nota.contains("-");
+		boolean esSostenido = nota.contains("#");
+		
+		String notaAux = nota.replace("-", "");
+		notaAux = notaAux.replace("#", "");
+		
+		PosGuitarra[] resul;
+		
+		switch(notaAux) {
+		case "do5":
+			resul = cuerda_traste_do5;
+			break;
+		case "do4":
+			resul = cuerda_traste_do4;
+			break;
+		case "do3":
+			resul = cuerda_traste_do3;
+			break;
+		case "re5":
+			resul = cuerda_traste_re5;
+			break;
+		case "re4":
+			resul = cuerda_traste_re4;
+			break;
+		case "re3":
+			resul = cuerda_traste_re3;
+			break;
+		case "mi5":
+			resul = cuerda_traste_mi5;
+			break;
+		case "mi4":
+			resul = cuerda_traste_mi4;
+			break;
+		case "mi3":
+			resul = cuerda_traste_mi3;
+			break;
+		case "mi2":
+			resul = cuerda_traste_mi2;
+			break;
+		case "fa4":
+			resul = cuerda_traste_fa4;
+			break;
+		case "fa3":
+			resul = cuerda_traste_fa3;
+			break;
+		case "fa2":
+			resul = cuerda_traste_fa2;
+			break;
+		case "sol4":
+			resul = cuerda_traste_sol4;
+			break;
+		case "sol3":
+			resul = cuerda_traste_sol3;
+			break;
+		case "sol2":
+			resul = cuerda_traste_sol2;
+			break;
+		case "la4":
+			resul = cuerda_traste_la4;
+			break;
+		case "la3":
+			resul = cuerda_traste_la3;
+			break;
+		case "la2":
+			resul = cuerda_traste_la2;
+			break;
+		case "si4":
+			resul = cuerda_traste_si4;
+			break;
+		case "si3":
+			resul = cuerda_traste_si3;
+			break;
+		case "si2":
+			resul = cuerda_traste_si2;
+			break;
+		default:
+			throw new NotaDesconocidaException(nota);
+		}
+		
+		if(esBemol) {
+			for(int i = 0; i < resul.length; i++) {
+				resul[i].setTraste(resul[i].getTraste()-1);
+			}
+		}
+		else if(esSostenido) {
+			for(int i = 0; i < resul.length; i++) {
+				resul[i].setTraste(resul[i].getTraste()+1);
+			}
+		}
+		
+		return resul;
+	}
 	
-	private JSONObject objetoDigitacionSalida(PosGuitarra[] digitacionFinal, int mejorCoste, int numNotasYTrastes) {
+	/*
+	 * 
+	 * FUNCIONES PARA LA DIGITACION DE LOS DEDOS
+	 */
+	
+	/**
+	 * Funcion que se encarga de calcular la mejor digitación de los dedos de ambas manos para cada nota de una partitura. Usando programación dinámica 
+	 * de manera iterativa, rellenando la matriz de coste hacia atras.
+	 * @param notas {@link JSONArray} que contiene las notas de la partitura a digitar.
+	 * @param cuerda_traste_mejor array de {@link PosGuitarra} que contiene las cuerdas y trastes elegidos anteriormente para tocar cada nota de la 
+	 * partitura
+	 * @return array de {@link Dedo} que contiene los dedos de cada mano elegidos para tocar cada nota de la partitura
+	 */
+	private Dedo[] digitacion_dedos_iter(JSONArray notas, PosGuitarra[] cuerda_traste_mejor) {
+		int n = notas.length();
+		double[][] costeManoIzquierda = new double[n + 1][4];
+		
+		for(int i = 0; i < n; i++) {
+			for(int j = 0; j < 4; j++) {
+				costeManoIzquierda[i][j] = Double.MAX_VALUE;
+			}
+		}
+		
+		
+		for(int j = 0; j < 4; j++) {
+			costeManoIzquierda[n][j] = 0.0;
+		}
+		
+		
+		//Rellenamos matriz
+		for(int i = n - 1; i > 0; i--) {
+			for(int d = 0; d < 4; d++) {
+				for(int d_i = 0; d_i < 4; d_i++) {
+					double costeAux = costeDesplManoIzq(d, d_i, cuerda_traste_mejor[i-1], cuerda_traste_mejor[i]) + costeManoIzquierda[i+1][d_i];
+					costeManoIzquierda[i][d] = Math.min(costeManoIzquierda[i][d], costeAux);
+				}
+			}
+		}
+		
+		//Recuperamos mejor camino para la mano izquierda
+		int[] mejorCaminoIzq = new int[n];
+		for(int i = 0; i < n - 1; i++) {
+			double mejorCoste = Double.MAX_VALUE;
+			int dedo_mejor = -1;
+			for(int d = 0; d < 4; d++) {
+				if(costeManoIzquierda[i+1][d] < mejorCoste) {
+					dedo_mejor = d;
+					mejorCoste = costeManoIzquierda[i+1][d];
+				}
+			}
+			
+			mejorCaminoIzq[i] = dedo_mejor;
+		}
+		
+		double mejorCoste = Double.MAX_VALUE;
+		int dedo_mejor = -1;
+		for(int d = 0; d < 4; d++) {
+			double aux = costeDesplManoIzq(mejorCaminoIzq[n-2], d, cuerda_traste_mejor[n-2], cuerda_traste_mejor[n-1]);
+			if(aux < mejorCoste) {
+				dedo_mejor = d;
+				mejorCoste = aux;
+			}
+		}
+		
+		mejorCaminoIzq[n-1] = dedo_mejor;
+		
+		/*
+		 * 
+		 * DIGITACION MANO DERECHA
+		 * 
+		 */
+		
+		int[][] costeManoDerecha = new int[n+1][5];
+		
+		for(int i = 0; i < n; i++) {
+			for(int j = 0; j < 5; j++) {
+				costeManoDerecha[i][j] = Integer.MAX_VALUE;
+			}
+		}
+
+		for(int j = 0; j < 5; j++) {
+			costeManoDerecha[n][j] = 0;
+		}
+		
+		for(int i = n - 1; i > 0; i--) {
+			for(int d = 0; d < 5; d++) {
+				for(int d_i = 0; d_i < 5; d_i++) {
+					int costeAux = costeDesplManoDer(d, d_i, cuerda_traste_mejor[i-1], cuerda_traste_mejor[i]) + costeManoDerecha[i+1][d_i];
+					costeManoDerecha[i][d] = Math.min(costeManoDerecha[i][d], costeAux);
+				}
+			}
+		}
+		
+		//Recolectamos mejor camino mano derecha
+		int[] mejorCaminoDer = new int[n];
+		for(int i = 0; i < n - 1; i++) {
+			int mejorAct = Integer.MAX_VALUE;
+			for(int d = 0; d < 5; d++) {
+				if(costeManoDerecha[i+1][d] < mejorAct) {
+					mejorAct = costeManoDerecha[i+1][d];
+					mejorCaminoDer[i] = d;
+				}
+			}
+		}
+		
+		int mejorAct = Integer.MAX_VALUE;
+		for(int d = 0; d < 5; d++) {
+			int aux = costeDesplManoDer(mejorCaminoDer[n-2], d, cuerda_traste_mejor[n-2], cuerda_traste_mejor[n-1]);
+			if(aux < mejorAct) {
+				mejorAct = aux;
+				mejorCaminoDer[n-1] = d;
+			}
+		}
+		
+		//Guardamos ambos resultados
+		
+		Dedo[] resul = new Dedo[n];
+		for(int i = 0; i < n; i++) {
+			resul[i] = new Dedo(mejorCaminoIzq[i] + 1, mejorCaminoDer[i]);
+		}
+		
+		return resul;
+	}
+
+	/*
+	 * FUNCIONES AUXILIARES PARA LA MANO DERECHA
+	 */
+	
+	/**
+	 * Función auxiliar que sirve para calcular el coste de mover la mano DERECHA para tocar la siguiente nota dados:
+	 * @param dedo_act dedo que tocó la ultima nota
+	 * @param dedo_sig dedo que pretende tocar la siguiente nota
+	 * @param posGuitarraAct cuerda y traste en la que se toco la ultima nota
+	 * @param posGuitarraSig cuerda y traste en la que se tocará la siguiente nota
+	 * @return Coste de mover la mano derecha con los parámetros proporcionados
+	 */
+	private int costeDesplManoDer(int dedo_act, int dedo_sig, PosGuitarra posGuitarraAct, PosGuitarra posGuitarraSig) {
+		
+		if(posGuitarraSig.getCuerda() == -1 || posGuitarraAct.getCuerda() == -1) {
+			return 0;
+		}
+		int cuerdaActualDedoSig = calculo_cuerda_dedo_der(dedo_act, dedo_sig, posGuitarraAct);
+		return Math.abs(cuerdaActualDedoSig - posGuitarraSig.getCuerda());
+	}
+
+	/**
+	 * Función auxiliar que calcula la cuerda sobre la que se encuentra un dedo segun la posición de la mano. No significa que este tocando esa cuerda,
+	 * pero calcula como de lejos(en términos de cuerdas) que esta un dedo de otro segun la ultima nota tocada.
+	 * @param dedo_act Dedo que tóco la ultima nota
+	 * @param dedo_sig Dedo que pretende tocar la siguiente nota
+	 * @param posGuitarraAct Cuerda y traste donde se tocó la última nota.
+	 * @return Cuerda en la que se encuentra el dedo
+	 */
+	private int calculo_cuerda_dedo_der(int dedo_act, int dedo_sig, PosGuitarra posGuitarraAct) {
+		int diffAlturaDedos = altura_der(dedo_act) - altura_der(dedo_sig);
+		
+		return Math.max(-1, posGuitarraAct.getCuerda() - diffAlturaDedos);
+	}
+
+	/**
+	 * Función auxiliar que calcula la altura relativa de un dedo de la mano derecha al tocar la guitarra
+	 * @param dedo_act dedo del que se quiere saber su altura
+	 * @return altura del dedo dado
+	 */
+	private int altura_der(int dedo_act) {
+		switch(dedo_act) {
+		case PULGAR_DERECHO:
+			return ALTURA_PULGAR_DERECHO;
+		case INDICE_DERECHO:
+			return ALTURA_INDICE_DERECHO;
+		case CORAZON_DERECHO:
+			return ALTURA_CORAZON_DERECHO;
+		case ANULAR_DERECHO:
+			return ALTURA_ANULAR_DERECHO;
+		case MEÑIQUE_DERECHO:
+			return ALTURA_MEÑIQUE_DERECHO;
+		default:
+			return -1;
+		}
+	}
+	
+	
+	/*
+	 * 
+	 * FUNCIONES AUXILIARES PARA LA MANO IZQUIERDA
+	 */
+
+	/**
+	 * Funcion auxiliar que calcula el coste de desplazar la mano izquierda al tocar la guitarra pasando de una nota a otra.
+	 * @param dedo_actual dedo con el que se tocó la última nota
+	 * @param dedo_siguiente_candidato dedo con el que se pretende tocar la siguiente nota
+	 * @param posGuitarraAct Cuerda y traste en los que se tocó la última nota.
+	 * @param posGuitarraSig Cuerda y traste en los que se va a tocar la siguiente nota.
+	 * @return coste de Mover la mano izquierda
+	 */
+	private double costeDesplManoIzq(int dedo_actual, int dedo_siguiente_candidato, PosGuitarra posGuitarraAct, PosGuitarra posGuitarraSig) {
+		PosGuitarra pos_actual_dedo_candidato = calculo_pos_dedo(dedo_actual, dedo_siguiente_candidato, posGuitarraAct);
+		double resul;
+		
+		if(pos_actual_dedo_candidato.equals(posGuitarraSig) || posGuitarraAct.getTraste() == 0) {
+			resul = 0.0;
+		}
+		else {
+			resul = desp_h(pos_actual_dedo_candidato, posGuitarraSig) + desp_v(pos_actual_dedo_candidato, posGuitarraSig, dedo_siguiente_candidato);
+		}
+		
+		return resul;
+	}
+
+	/**
+	 * Funcion auxiliar que calcula el coste del desplazamiento HORIZONTAL de la mano izquierda y, más concretamente, del dedo que se pretende usar dado:
+	 * @param pos_actual_dedo_candidato cuerda y traste en los que se encuentra el dedo que se va a usar
+	 * @param posGuitarraSig Cuerda y traste en los que se tiene que colocar el dedo que se va a usar
+	 * @return Coste del desplazamiento horizontal de la mano izquierda.
+	 */
+	private double desp_h(PosGuitarra pos_actual_dedo_candidato, PosGuitarra posGuitarraSig) {
+		int t_act = pos_actual_dedo_candidato.getTraste();
+		int t_sig = posGuitarraSig.getTraste();
+		double coste = 0.0;
+		if(t_act == t_sig) {
+			return 0.0;
+		}
+		else {
+			int maxi = Math.max(t_act, t_sig);
+			int mini = Math.min(t_act, t_sig);
+			while(maxi != mini) {
+				if(maxi >= INICIO_FRANJA_ESTRECHA) {
+					coste += COSTE_FRANJA_ESTRECHA;
+				}
+				else if(maxi >= INICIO_FRANJA_MEDIA) {
+					coste += COSTE_FRANJA_MEDIA;
+				}
+				else {
+					coste += COSTE_FRANJA_ANCHA;
+				}
+				maxi--;
+			}
+		}
+		
+		return coste;
+	}
+
+	/**
+	 * Función auxiliar que calcula el coste del desplazamiento VERTICAL de la mano izquierda, dado:
+	 * @param pos_actual_dedo_candidato Cuerda y traste en los que se encuentra el dedo que se va a usar
+	 * @param posGuitarraSig Cuerda y traste a los que se tiene que mover el dedo
+	 * @param dedoSig Dedo que pretende tocar la nota
+	 * @return Coste del desplazamiento vertical de la mano izquierda.
+	 */
+	private double desp_v(PosGuitarra pos_actual_dedo_candidato, PosGuitarra posGuitarraSig, int dedoSig) {
+		
+		double coste = Math.abs(posGuitarraSig.getCuerda() - pos_actual_dedo_candidato.getCuerda());
+		
+		if(posGuitarraSig.getCuerda() >= 4 && dedoSig == MEÑIQUE_IZQUIERDO) { // penalizacion por llevar el meñique tan arriba
+			coste *= PENALIZACION_MEÑIQUE_ALTO;
+		}
+		
+		return coste;
+	}
+
+	/**
+	 * Función auxiliar que calcula la posición(Cuerda y traste) en la que se encuentra EN LA MANO DERECHA un dedo según donde se encuentra otro dedo
+	 * @param dedo_actual Dedo del cual se conoce la posición
+	 * @param dedo_siguiente_candidato Dedo del cual se pretende conocer su posición
+	 * @param posGuitarraAct Posición del dedo {@link dedo_actual}
+	 * @return Posición en la que se encuentra el dedo {@link dedo_siguiente_candidato} 
+	 */
+	private PosGuitarra calculo_pos_dedo(int dedo_actual, int dedo_siguiente_candidato, PosGuitarra posGuitarraAct) {
+		
+		if(dedo_actual == dedo_siguiente_candidato) {
+			return posGuitarraAct;
+		}
+		else {
+			//Calculo traste: se asume que los 4 dedos ocupan 4 trastes contiguos
+			int traste = posGuitarraAct.getTraste() - (dedo_actual - dedo_siguiente_candidato);
+			int cuerda = posGuitarraAct.getCuerda();
+			//Calcula cuerda
+			cuerda = cuerda - (altura_izq(dedo_actual) - altura_izq(dedo_siguiente_candidato));
+			
+			return new PosGuitarra(cuerda, traste);
+		}
+		
+	}
+	/**
+	 * Funcion auxiliar que calcula la altura relativa de un dedo de la mano izquierda
+	 * @param dedo dedo del cual se pretende conocer su altura
+	 * @return altura relativa del dedo
+	 */
+	private int altura_izq(int dedo) {
+		switch(dedo) {
+		case INDICE_IZQUIERDO:
+			return ALTURA_INDICE_IZQUIERDO;
+		case CORAZON_IZQUIERDO:
+			return ALTURA_CORAZON_IZQUIERDO;
+		case ANULAR_IZQUIERDO:
+			return ALTURA_ANULAR_IZQUIERDO;
+		case MEÑIQUE_IZQUIERDO:
+			return ALTURA_MEÑIQUE_IZQUIERDO;
+		default:
+			return -1;
+		}
+	}
+	
+	/*
+	 * 
+	 * FUNCIONES PARA LA ENTRADA/SALIDA
+	 */
+	
+	
+	/**
+	 * Función auxiliar que crea un {@link JSONObject} con la información necesaria para digitar la partitura. Este objeto sera pasado al embajador para
+	 * que digite la partitura
+	 * @param digitacionFinal Cuerda y traste en los que tocar cada nota de la partitura
+	 * @param dedosFinal dedos con los que tocar cada nota de la partitura
+	 * @param mejorCoste Coste de la digitación
+	 * @param numNotasYTrastes Numero de notas y acordes en la partitura
+	 * @param rutaArchivoNuevo Ruta en la que se quiere guardar en MusicXML con la partitura digitada
+	 * @return {@link JSONObject} con la información de la digitación.
+	 */
+	private JSONObject objetoDigitacionSalida(PosGuitarra[] digitacionFinal, Dedo[] dedosFinal, int mejorCoste, int numNotasYTrastes, String rutaArchivoNuevo) {
 		JSONObject json_salida = new JSONObject();
 		
 		JSONArray arrayDigitacion = new JSONArray();
 		
 		for(int i = 0; i < digitacionFinal.length; i++) {
-			arrayDigitacion.put("%d,%d".formatted(digitacionFinal[i].getCuerda(), digitacionFinal[i].getTraste()));
+			arrayDigitacion.put("%d,%d,%d,%c".formatted(digitacionFinal[i].getCuerda(), digitacionFinal[i].getTraste(), 
+																dedosFinal[i].getDedo_izq(), getDedoDerecho_char(dedosFinal[i].getDedo_der())));
 		}
 		
 		json_salida.put("digitacion", arrayDigitacion);
 		json_salida.put("coste", mejorCoste);
 		json_salida.put("numNotasYTrastes", numNotasYTrastes);
+		json_salida.put("rutaNuevoArchivo", rutaArchivoNuevo);
 		
 		
 		
 		return json_salida;
 	}
 	
-	private PosGuitarra[] posiblesDigitaciones(String nota) {
-		if(nota.equalsIgnoreCase("do")) {
-			return cuerda_traste_do;
-		}
-		else if(nota.equalsIgnoreCase("re")) {
-			return cuerda_traste_re;
-		}
-		else if(nota.equalsIgnoreCase("mi")) {
-			return cuerda_traste_mi;
-		}
-		else if(nota.equalsIgnoreCase("fa")) {
-			return cuerda_traste_fa;
-		}
-		else if(nota.equalsIgnoreCase("sol")) {
-			return cuerda_traste_sol;
-		}
-		else if(nota.equalsIgnoreCase("la")) {
-			return cuerda_traste_la;
-		}
-		else if(nota.equalsIgnoreCase("si")) {
-			return cuerda_traste_si;
-		}
-		else {
-			System.out.println("Esto no es una nota");
-			return null;
+	/**
+	 * Funcion que dado un identificador de dedo de la mano derecha de la PD, devuelve el caracter correspondiente para apuntarlo en la partitura.
+	 * @param dedo_der
+	 * @return caracter representativo del dedo dado
+	 */
+	private char getDedoDerecho_char(int dedo_der) {
+		switch(dedo_der) {
+		case PULGAR_DERECHO:
+			return CARACTER_PULGAR;
+		case INDICE_DERECHO:
+			return CARACTER_INDICE;
+		case CORAZON_DERECHO:
+			return CARACTER_CORAZON;
+		case ANULAR_DERECHO:
+			return CARACTER_ANULAR;
+		case MEÑIQUE_DERECHO:
+			return CARACTER_MEÑIQUE;
+		default:
+			return CARACTER_DEDO_DESCONOCIDO;
+			
 		}
 	}
+	
+	
 }

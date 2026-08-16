@@ -8,17 +8,17 @@ public class Partitura {
 	private Mi_MusicXML partitura_MusicXML;
 	private Mi_Midi partitura_Midi;
 	
-	public Partitura(String nombre, String pdf_path, Mi_MusicXML musicxml) {
+	public Partitura(String nombre, String pdf_path, String musicxml) {
 		nombre_partitura = nombre;
 		ruta_pdf = pdf_path;
-		partitura_MusicXML = musicxml;
+		partitura_MusicXML = new Mi_MusicXML(musicxml);
 	}
 
-	public Partitura(String nombre, String pdf_path, Mi_MusicXML musicxml, Mi_Midi midi) {
+	public Partitura(String nombre, String pdf_path, String musicxml, String midi) {
 		nombre_partitura = nombre;
 		ruta_pdf = pdf_path;
-		partitura_MusicXML = musicxml;
-		partitura_Midi = midi;
+		partitura_MusicXML = new Mi_MusicXML(musicxml);
+		partitura_Midi = new Mi_Midi(midi);
 	}
 
 	public String getNombre_partitura() {
