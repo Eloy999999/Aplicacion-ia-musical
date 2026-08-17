@@ -1,13 +1,17 @@
 package gestion_partituras;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 import org.json.JSONObject;
 
 public class EmbajadorMusic21Python {
 	
-	private final String RUTA_SCRIPT_LECTORNOTAS_PY = "Aplicacion-ia-musical/Python/LectorNotas.py";
-    private final String RUTA_INTERPRETE = ".digitador/bin/python3";
+	private final String RUTA_SCRIPT_LECTORNOTAS_PY = "/home/drm/git/Aplicacion-ia-musical/Python/LectorNotas.py";
+	private final String RUTA_SCRIPT_DIGITACION_PY = "/home/drm/git/Aplicacion-ia-musical/Python/DigitacionFinal.py";
+    private final String RUTA_INTERPRETE = "venv/bin/python3";
 	
     public JSONObject getNotas(String rutaPartitura) {
         try {
@@ -45,12 +49,30 @@ public class EmbajadorMusic21Python {
         
     }
     
-    public JSONObject digitaPartitura(JSONObject info_digitacion) {
-    	JSONObject infoNuevaPartitura = null;
-    	String ruta_nuevo_archivo = null;
+    public void digitaPartitura(JSONObject info_digitacion) {
+    	BufferedWriter cartero = null;
+    	ProcessBuilder pb = new ProcessBuilder(RUTA_INTERPRETE, RUTA_SCRIPT_DIGITACION_PY);
+    	try {
+    		//Se inicia el script python que espera por STDIN el JSON con la informacion de la digitacion.
+			Process procesoDigitador = pb.start();
+			cartero = new BufferedWriter(new OutputStreamWriter(procesoDigitador.getOutputStream()));
+			//Enviamos el json y un newline para que python solo tenga que usar readNextLine()
+			cartero.write(info_digitacion.toString());
+			cartero.newLine();
+			cartero.flush();
+			// Esperamos a que termine y vemos el codigo de retorno.
+			int codRet = procesoDigitador.waitFor();
+			if(codRet != 0) {
+				
+			}
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} 
     	
-    	//TODO: Hacer esto para comunicarse con python y que haga la digitacion
     	
-    	return infoNuevaPartitura;
     }
 }
