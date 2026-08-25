@@ -11,7 +11,7 @@ public class Mi_MusicXML {
 	
 	
 //	public void cambiar_nota(int pos_nota, NotaMusicXML nueva_nota) {
-//		
+//
 //	}
 	
 	

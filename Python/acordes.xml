@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 4.0 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="4.0">
+  <part-list>
+    <score-part id="P1">
+      <part-name>Guitarra</part-name>
+    </score-part>
+  </part-list>
+  
+  <part id="P1">
+    <!-- COMPÁS 1: Acorde de 3 notas (Do Mayor: C4, E4, G4) -->
+    <measure number="1">
+      <attributes>
+        <divisions>1</divisions>
+        <key>
+          <fifths>0</fifths> <!-- Tonalidad Do Mayor -->
+        </key>
+        <time>
+          <beats>4</beats>
+          <beat-type>4</beat-type> <!-- Compás 4/4 -->
+        </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+          <clef-octave-change>-1</clef-octave-change> <!-- Clave de Sol 8va baja (Guitarra) -->
+        </clef>
+      </attributes>
+      
+      <!-- Nota Base del Acorde: Do4 (C4) - Negra -->
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+      
+      <!-- Segunda Nota del Acorde: Mi4 (E4) - Superpuesta con <chord/> -->
+      <note>
+        <chord/>
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+      
+      <!-- Tercera Nota del Acorde: Sol4 (G4) - Superpuesta con <chord/> -->
+      <note>
+        <chord/>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+
+      <!-- Silencio para completar el compás 1 -->
+      <note>
+        <rest/>
+        <duration>3</duration>
+        <type>half</type>
+        <dot/>
+      </note>
+    </measure>
+
+    <!-- COMPÁS 2: Secuencia de notas individuales -->
+    <measure number="2">
+      <!-- Nota 1: La4 (A4) -->
+      <note>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+      
+      <!-- Nota 2: Si4 (B4) -->
+      <note>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+
+      <!-- Nota 3: Do5 (C5) -->
+      <note>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+
+      <!-- Nota 4: Re5 (D5) -->
+      <note>
+        <pitch>
+          <step>D</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>1</duration>
+        <type>quarter</type>
+      </note>
+    </measure>
+  </part>
+</score-partwise>
