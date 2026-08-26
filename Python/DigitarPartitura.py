@@ -1,5 +1,6 @@
 import json
 import sys
+import xml.etree.ElementTree as ET
 import music21
 
 MAPA_ROMANOS = {
@@ -7,91 +8,162 @@ MAPA_ROMANOS = {
     7: "VII", 8: "VIII", 9: "IX", 10: "X", 11: "XI", 12: "XII"
 }
 
-# Mapeo para números en círculo
 MAPA_CUERDA_CIRCULO = {
     1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤", 6: "⑥"
 }
 
-def entero_a_romano(num): # Pasa el valor del numero dado a su numero romano correspondiente
+MAPA_DEDO_DCHO = {
+    1: "p", 2: "i", 3: "c", 4: "a", 5: "m"
+}
+
+def entero_a_romano(num):
     try:
         val = int(num)
         return MAPA_ROMANOS.get(val, str(num))
     except (ValueError, TypeError):
         return str(num)
 
-def digitarPartitura(): # Parsea el JSON recibido y digita la partitura y la exporta a otro xml
-    json_raw = sys.stdin.readline() # Saca el JSON
+def limpiar_prefijo(texto):
+    texto = texto.strip()
+    if not texto:
+        return ""
+    for i, caracter in enumerate(texto):
+        if caracter.isdigit():
+            return texto[i:]
+    return texto
+
+def obtener_textos_digitacion(val_digitacion_nota):
+    partes = [p.strip() for p in str(val_digitacion_nota).split(",")]
+
+    cuerda_raw   = partes[0] if len(partes) > 0 else ""
+    traste_raw   = partes[1] if len(partes) > 1 else ""
+    dedo_izq_raw = partes[2] if len(partes) > 2 else ""
+    dedo_der_raw = partes[3] if len(partes) > 3 else ""
+
+    cuerda   = limpiar_prefijo(cuerda_raw)
+    traste   = limpiar_prefijo(traste_raw)
+    dedo_izq = limpiar_prefijo(dedo_izq_raw)
+    dedo_der = limpiar_prefijo(dedo_der_raw)
+
+    elem_arriba = []
+    if dedo_izq != "":
+        elem_arriba.append(dedo_izq)
+    if traste != "":
+        elem_arriba.append(entero_a_romano(traste))
+    texto_arriba = " ".join(elem_arriba)
+
+    elem_abajo = []
+    if cuerda != "":
+        if cuerda.isdigit():
+            num_c = int(cuerda)
+            elem_abajo.append(MAPA_CUERDA_CIRCULO.get(num_c, cuerda))
+        else:
+            elem_abajo.append(cuerda)
+
+    if dedo_der != "":
+        if dedo_der.isdigit():
+            num_dd = int(dedo_der)
+            elem_abajo.append(MAPA_DEDO_DCHO.get(num_dd, dedo_der))
+        else:
+            elem_abajo.append(dedo_der)
+        
+    texto_abajo = " ".join(elem_abajo)
+
+    return texto_arriba, texto_abajo
+
+def remover_nombres_e_instrucciones_pantalla(ruta_xml):
+    """
+    Desactiva explícitamente la impresión de nombres de instrumentos en MusicXML 
+    y limpia los elementos <part-name> e <instrument-name>.
+    """
+    tree = ET.parse(ruta_xml)
+    root = tree.getroot()
+
+    # 1. Configurar <part-name> para que tenga el atributo print-object="no"
+    for part_name in root.iter('part-name'):
+        part_name.text = ""
+        part_name.set('print-object', 'no')
+
+    for part_abbrev in root.iter('part-abbreviation'):
+        part_abbrev.text = ""
+        part_abbrev.set('print-object', 'no')
+
+    # 2. Vaciar nombres de instrumentos
+    for elem_tag in ['instrument-name', 'instrument-abbreviation']:
+        for elem in root.iter(elem_tag):
+            elem.text = ""
+
+    tree.write(ruta_xml, encoding="UTF-8", xml_declaration=True)
+
+def digitarPartitura():
+    json_raw = sys.stdin.read()
     if not json_raw.strip():
         sys.exit(1)
 
-    datosjson = json.loads(json_raw) # Saca los datos del JSON
+    datosjson = json.loads(json_raw)
     digitaciones = datosjson.get("digitaciones", [])
     archivo_in = datosjson.get("archivo_in", "")
     archivo_out = datosjson.get("archivo_out", "")
 
     try:
-        score = music21.converter.parse(archivo_in) # Parsea la partitura para obtener sus datos y poder modificarlos
+        score = music21.converter.parse(archivo_in)
 
-        for p in score.getElementsByClass('Part'): # Cada instrumento de cada pista debe ser guitarra, asi se asegura que no hay fallos de incompatibilidad de instrumentos en digitacion
-            p.partName = "Guitarra"
-            p.partAbbreviation = "Gtr."
-            insts = list(p.getElementsByClass('Instrument'))
-            for inst in insts:
-                p.remove(inst)
-            p.insert(0, music21.instrument.AcousticGuitar())
-
-        notas_y_acordes = [el for el in score.recurse().notes if el.isNote or el.isChord] # Notas y acordes de la partitura
+        # Aplicación de las digitaciones
+        elementos = [el for el in score.recurse().notes if el.isNote or el.isChord]
+        idx_digitacion = 0
         total_digitaciones = len(digitaciones)
 
-        for i, el in enumerate(notas_y_acordes):
-            if i >= total_digitaciones:
+        for el in elementos:
+            if idx_digitacion >= total_digitaciones:
                 break
 
-            val_digitacion = str(digitaciones[i]) # Obtener valores de la digitacion actual
-            partes = [p.strip() for p in val_digitacion.split(",")]
+            cadena_digitacion = digitaciones[idx_digitacion]
+            idx_digitacion += 1
 
-            cuerda = partes[0] if len(partes) > 0 else ""
-            traste = partes[1] if len(partes) > 1 else ""
-            dedo_izq = partes[2] if len(partes) > 2 else ""
-            dedo_der = partes[3] if len(partes) > 3 else ""
+            if isinstance(el, music21.chord.Chord):
+                sub_digitaciones = cadena_digitacion.split("+")
+                notas_ordenadas = sorted(el.notes, key=lambda n: n.pitch, reverse=True)
 
-            target_note = el if isinstance(el, music21.note.Note) else el.notes[0]
+                arriba_partes = []
+                abajo_partes = []
 
-            # ---  DEDO IZQUIERDO (Arriba, numero normal) ---
-            if dedo_izq and dedo_izq != "0":
-                f_lh = music21.articulations.Fingering(dedo_izq) # Crear y aniadir digitacion
-                f_lh.placement = "above"
-                target_note.articulations.append(f_lh)
+                for i in range(len(notas_ordenadas)):
+                    if i < len(sub_digitaciones):
+                        t_arr, t_aba = obtener_textos_digitacion(sub_digitaciones[i])
+                        if t_arr:
+                            arriba_partes.append(t_arr)
+                        if t_aba:
+                            abajo_partes.append(t_aba)
 
-            # --- TRASTE (Arriba, numero romano) ---
-            if traste and traste.isdigit() and int(traste) > 0:
-                s_ind = music21.articulations.StringIndication(int(traste)) # Crear y aniadir digitacion
-                s_ind.placement = "above"
-                target_note.articulations.append(s_ind)
-#                texto_traste = music21.expressions.TextExpression(entero_a_romano(traste)) # O simplemente '5'
-#                texto_traste.style.placement = 'above' # Posición: encima del pentagrama
+                if arriba_partes:
+                    texto_arr = "\n".join(arriba_partes)
+                    f_above = music21.articulations.Fingering(texto_arr)
+                    f_above.placement = "above"
+                    el.articulations.append(f_above)
 
-                # Asignarlo a las expresiones de la nota
-#                target_note.expressions.append(texto_traste)
+                if abajo_partes:
+                    for num_linea, texto in enumerate(abajo_partes, start=1):
+                        lyr = music21.note.Lyric(text=texto, number=num_linea)
+                        el.lyrics.append(lyr)
 
-            # --- CUERDA EN CIRCULO Y MANO DERECHA (Abajo) ---
-            elementos_abajo = []
-            
-            if cuerda and cuerda.isdigit(): # Convierte el numero de cuerda al simbolo en circulo
-                num_c = int(cuerda)
-                if num_c in MAPA_CUERDA_CIRCULO:
-                    elementos_abajo.append(MAPA_CUERDA_CIRCULO[num_c])
-            
-            if dedo_der: # Aniadir cuerda y despues dedo derecho
-                elementos_abajo.append(dedo_der)
+            else:
+                t_arr, t_aba = obtener_textos_digitacion(cadena_digitacion)
 
-            if elementos_abajo: # Que aparezca en partitura cuerda y dedo derecho
-                texto_abajo = " ".join(elementos_abajo)
-                lyr = music21.note.Lyric(text=texto_abajo)
-                # lyr.style.fontSize = 8
-                target_note.lyrics.append(lyr)
+                if t_arr:
+                    f_above = music21.articulations.Fingering(t_arr)
+                    f_above.placement = "above"
+                    el.articulations.append(f_above)
 
+                if t_aba:
+                    lyr = music21.note.Lyric(text=t_aba, number=1)
+                    el.lyrics.append(lyr)
+
+        # 1. Exportar MusicXML con music21
         score.write('musicxml', fp=archivo_out)
+
+        # 2. Inyectar atributo print-object="no" para forzar la ocultación visual
+        remover_nombres_e_instrucciones_pantalla(archivo_out)
+
         print(f"Exito: Guardado en {archivo_out}")
 
     except Exception as e:
