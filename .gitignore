@@ -1,2 +1,5 @@
 hola.cpp
 Java/.project
+venv/
+.vscode/settings.json
+Java/bin/

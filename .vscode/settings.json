@@ -5,5 +5,10 @@
         "c:\\Users\\Eloy\\Desktop\\jackson-core-2.17.0.jar",
         "c:\\Users\\Eloy\\Desktop\\jackson-databind-2.17.0.jar"
     ],
+<<<<<<< HEAD
     "xml.downloadExternalResources.enabled": true
+=======
+    "git.ignoreLimitWarning": true,
+    "java.debug.settings.onBuildFailureProceed": true
+>>>>>>> digitacion_java_dedos
 }

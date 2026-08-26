@@ -34,6 +34,12 @@ public class Main{
             // Se ejecuta si la cadena contiene caracteres no permitidos en el S.O.
             System.err.println("La cadena no es una ruta de archivo válida: " + e.getMessage());
         }
+//    	String x = "si3,do5,mi3";
+//    	String[] xs = x.split(",");
+//    	System.out.println(xs.length);
+//    	for(int i = 0; i < xs.length; i++) {
+//    		System.out.println(xs[i]);
+//    	}
     
     }
 }

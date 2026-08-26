@@ -32,4 +32,9 @@ public class Mi_MusicXML {
 	public void cambiar_dedo_D(int pos_nota, int dedo) {
 		
 	}
+	
+	//Getter ruta
+	public String getRuta() {
+		return ruta_archivo;
+	}
 }
