@@ -5,3 +5,11 @@
 /Digitador$PosGuitarra.class
 /NotaEnOctavaInalcanzableException.class
 /NotaDesconocidaException.class
+/Digitador$Configuracion.class
+/Digitador$PosiblesConfiguraciones.class
+/AcordeLongitudImposibleException.class
+/Digitador$ConfiguracionDedo.class
+/Digitador$PosiblesConfiguracionesDedos.class
+/Digitador$PosiblesConfiguracionesMano.class
+/Digitador$ConfiguracionMano.class
+/Digitador$ConfiguracionManos.class
