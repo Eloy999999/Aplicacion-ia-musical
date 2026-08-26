@@ -1,6 +1,6 @@
 package digitacion;
 
-public class AcordeLongitudImposibleException extends IllegalArgumentException {
+public class AcordeLongitudImposibleException extends Exception {
 	private String acorde;
 	public AcordeLongitudImposibleException(String ac) {
 		acorde = ac;

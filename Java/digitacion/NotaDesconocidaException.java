@@ -1,6 +1,6 @@
 package digitacion;
 
-public class NotaDesconocidaException extends IllegalArgumentException {
+public class NotaDesconocidaException extends Exception {
 	private String notaInalcanzable;
 	public NotaDesconocidaException(String nota) {
 		notaInalcanzable = nota;

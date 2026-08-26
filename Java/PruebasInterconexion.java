@@ -1,5 +1,6 @@
 import org.json.JSONObject;
 
+import digitacion.AcordeLongitudImposibleException;
 import digitacion.Digitador;
 import digitacion.NotaDesconocidaException;
 import gestion_partituras.Partitura;
@@ -15,9 +16,13 @@ public class PruebasInterconexion {
 		try {
 //			JSONObject info = digit.digita(part);
 //			System.out.print(info.toString());
-			digit.digita(part);
+//			digit.digita(part);
+			digit.digitaConAcordes(part);
 		} catch(NotaDesconocidaException e) {
 			System.out.println("No se pudo digitar, la nota " + e.getNotaInalcanzable() + "es desconocida o esta fuera de octava");
+		} catch(AcordeLongitudImposibleException e1) {
+			System.out.println("No se pudo digitar, El acorde " + e1.getAcordeRaro() + "tiene longitud imposible");
 		}
+		
 	}
 }
