@@ -1,9 +1,11 @@
 package gestion_partituras;
 
+import java.nio.file.Path;
+
 public class Mi_MusicXML {
-	private String ruta_archivo;
+	private Path ruta_archivo;
 	
-	public Mi_MusicXML(String rutaArchivo) {
+	public Mi_MusicXML(Path rutaArchivo) {
 		ruta_archivo = rutaArchivo;
 	}
 	
@@ -34,7 +36,7 @@ public class Mi_MusicXML {
 	}
 	
 	//Getter ruta
-	public String getRuta() {
+	public Path getRuta() {
 		return ruta_archivo;
 	}
 }

@@ -363,7 +363,7 @@ public class Digitador {
 
 	private static final int MAX_CONFIGURACIONES_MANO_DERECHA = 25;
 	
-	public String digitaConAcordes(Partitura partitura) throws NotaDesconocidaException, AcordeLongitudImposibleException {
+	public String digitaConAcordes(Partitura partitura) throws NotaDesconocidaException, AcordeLongitudImposibleException, JSONException {
 		String rutaXMLSalida;
 		
 		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python();
@@ -416,7 +416,7 @@ public class Digitador {
 		infor_digit.put("archivo_in", partitura.getPartitura_Midi().getRuta());
 		embajador.digitaPartitura(infor_digit);
 		
-		//TODO:Pedirle al embajador que cree el pdf de la parittura
+		//TODO:Crear el pdf de la parittura
 		String rutaPdfDigitada = "";
 		
 		

@@ -1,20 +1,37 @@
 package gestion_partituras;
 
+import android.content.Context;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class BibliotecaPartituras {
 	private HashMap<String, Partitura> partituras;
 	private HashMap<String, Coleccion> colecciones;
-	private JSONObject infoPartis;
+
+	private Path pathApp;
+
+	private Context context;
+
+	private static final String RUTA_RELATIVA_JSON = "metadatos.json";
 	
-	public BibliotecaPartituras(JSONObject infoPartituras) {
-		infoPartis = infoPartituras;
-		
+	public BibliotecaPartituras(JSONObject infoPartituras, Context contexto) throws JSONException {
+		context = contexto;
+		pathApp = contexto.getFilesDir().toPath();
+
+		partituras = new HashMap<>(10);
+		colecciones = new HashMap<>(10);
+
 		JSONArray infoPartiturasIndividual = infoPartituras.getJSONArray("partituras");
 		
 		for(int i = 0; i < infoPartiturasIndividual.length(); i++) {
@@ -38,39 +55,36 @@ public class BibliotecaPartituras {
 		}
 	}
 
-	private Partitura parseaPartitura(JSONObject part_i_info) {
+
+
+	private Partitura parseaPartitura(JSONObject part_i_info) throws JSONException {
 		Partitura part;
 		
 		String nombrePartitura = part_i_info.getString("nombre");
-		String rutaPDF = part_i_info.getString("ruta_pdf");
-		String rutaMusicXML = part_i_info.getString("ruta_xml");
+		Path rutaPDF = pathApp.resolve(part_i_info.getString("ruta_pdf"));
+		Path rutaMusicXML = pathApp.resolve(part_i_info.getString("ruta_xml"));
 		if(part_i_info.has("ruta_midi")) {
-			part = new Partitura(nombrePartitura, rutaPDF, new Mi_MusicXML(rutaMusicXML), new Mi_Midi(part_i_info.getString("ruta_midi")));
+			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML, pathApp.resolve(part_i_info.getString("ruta_midi")));
 		}
 		else {
-			part = new Partitura(nombrePartitura, rutaPDF, new Mi_MusicXML(rutaMusicXML));
+			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML);
 		}
 		return part;
 		
 	}
 	
-	public Partitura getPartitura(String nombre) {
-		if(partituras.containsKey(nombre)) {
-			return partituras.get(nombre);
+	public Partitura getPartitura(String nombre) throws PartituraNoExisteException {
+		if(!partituras.containsKey(nombre)) {
+			throw new PartituraNoExisteException(nombre);
 		}
-		else {
-			//TODO: Lanzar excepcion ya que esto no deberia de pasar.
-			return null;
-		}
+		return partituras.get(nombre);
 	}
 	
-	public void insertaPartitura(Partitura nuevaPartitura) {
+	public void insertaPartitura(Partitura nuevaPartitura) throws NombrePartituraEnUsoException {
 		if(partituras.containsKey(nuevaPartitura.getNombre_partitura())) {
-			//TODO: lanzar excepcion porque esto no debe pasar
+			throw new NombrePartituraEnUsoException(nuevaPartitura.getNombre_partitura());
 		}
-		else {
-			partituras.put(nuevaPartitura.getNombre_partitura(), nuevaPartitura);
-		}
+		partituras.put(nuevaPartitura.getNombre_partitura(), nuevaPartitura);
 	}
 	
 	public List<Partitura> getAllPartituras() {
@@ -98,47 +112,58 @@ public class BibliotecaPartituras {
 		return resul;
 	}
 	
-	public void eliminaPartituras(List<String> nombres) {
+	public void eliminaPartituras(List<String> nombres) throws ArchivoNoSePudoBorrarException {
 		for(String nombre : nombres) {
 			Partitura p = partituras.get(nombre);
-			p.eliminaArchivos();
+//			p.eliminaArchivos();
+			File f = p.getRutaPDF().toFile();
+			boolean seElimino = f.delete();
+			if(!seElimino) {
+				throw new ArchivoNoSePudoBorrarException(p.getRutaPDF().getFileName().toString());
+			}
+			f = p.getPartitura_MusicXML().getRuta().toFile();
+
+			seElimino = f.delete();
+			if(!seElimino) {
+				throw new ArchivoNoSePudoBorrarException(p.getPartitura_MusicXML().getRuta().getFileName().toString());
+			}
 			partituras.remove(nombre);
 		}
 	}
 	
-	public void creaColeccion(List<String> nombres, String nombreColeccion) {
+	public void creaColeccion(List<String> nombres, String nombreColeccion) throws NombreColeccionEnUsoException, PartituraNoExisteException {
 		List<Partitura> partis = new ArrayList<>(nombres.size());
 		for(String nombre : nombres) {
 			if(!partituras.containsKey(nombre)) {
-				//TODO: lanzar excepcion
+				throw new PartituraNoExisteException(nombre);
 			}
 			partis.add(partituras.get(nombre));
 		}
 		if(colecciones.containsKey(nombreColeccion)) {
-			//TODO: lanzar excepcion ya que existe ya una coleccion
+			throw new NombreColeccionEnUsoException(nombreColeccion);
 		}
 		colecciones.put(nombreColeccion, new Coleccion(nombreColeccion, partis));
 	}
 	
-	public Coleccion getColeccion(String nombre) {
+	public Coleccion getColeccion(String nombre) throws NombreColeccionNoExisteException {
 		if(!colecciones.containsKey(nombre)) {
-			//TODO: Lanzar excepcion de que no existe
+			throw new NombreColeccionNoExisteException(nombre);
 		}
 		return colecciones.get(nombre);
 	}
 	
-	public void eliminaColeccion(String nombre) {
+	public void eliminaColeccion(String nombre) throws NombreColeccionNoExisteException {
 		if(!colecciones.containsKey(nombre)) {
-			//TODO: Lanzar excepcion de que no existe
+			throw new NombreColeccionNoExisteException(nombre);
 		}
 		colecciones.remove(nombre);
 	}
 	
-	public List<Partitura> getPartituras(List<String> nombres) {
+	public List<Partitura> getPartituras(List<String> nombres) throws PartituraNoExisteException {
 		List<Partitura> partis = new ArrayList<>(nombres.size());
 		for(String nombre : nombres) {
 			if(!partituras.containsKey(nombre)) {
-				//TODO: lanzar excepcion de que no existe
+				throw new PartituraNoExisteException(nombre);
 			}
 			else {
 				partis.add(partituras.get(nombre));
@@ -147,7 +172,65 @@ public class BibliotecaPartituras {
 		
 		return partis;
 	}
+
+	public List<String> getNombresPartiturasSinColeccion() {
+		List<String> resul = new ArrayList<>(10);
+		for(Partitura p : partituras.values()) {
+			boolean estaEnColeccion = false;
+			for(Coleccion c : colecciones.values()) {
+				if(c.contienePartitura(p.getNombre_partitura())) {
+					estaEnColeccion = true;
+				}
+			}
+			if(!estaEnColeccion) {
+				resul.add(p.getNombre_partitura());
+			}
+		}
+		return resul;
+	}
+
+
+
+	public List<String> getNombresColecciones() {
+		return new ArrayList<>(colecciones.keySet());
+	}
 	
-	
+	public void cierraBiblioteca() throws JSONException, IOException {
+		JSONObject jsonActualizado = new JSONObject();
+		JSONArray arrayPartituras = new JSONArray();
+		//guardamos las partituras que hay actualmente
+		for(String nombre : partituras.keySet()) {
+			Partitura partitura = partituras.get(nombre);
+			JSONObject objetoPartitura = new JSONObject();
+			objetoPartitura.put("nombre", nombre);
+			objetoPartitura.put("ruta_pdf", pathApp.relativize(partitura.getRutaPDF()).toString());
+			objetoPartitura.put("ruta_xml", pathApp.relativize(partitura.getPartitura_MusicXML().getRuta()).toString());
+
+			arrayPartituras.put(objetoPartitura);
+		}
+		jsonActualizado.put("partituras", arrayPartituras);
+
+		JSONArray arrayColecciones = new JSONArray();
+
+		for(String nombreColeccion : colecciones.keySet()) {
+			Coleccion coleccion = colecciones.get(nombreColeccion);
+			JSONObject objetoColeccionI = new JSONObject();
+			objetoColeccionI.put("nombre", coleccion.getNombre());
+			JSONArray nombresPartiturasColeccion = new JSONArray();
+			for(Partitura nombrePartitura : coleccion.getAllPartituras()) {
+				nombresPartiturasColeccion.put(nombrePartitura);
+			}
+			objetoColeccionI.put("nombres_partituras", nombresPartiturasColeccion);
+
+			arrayColecciones.put(objetoColeccionI);
+		}
+
+		jsonActualizado.put("colecciones", arrayColecciones);
+
+		File archivoSalida = pathApp.resolve(RUTA_RELATIVA_JSON).toFile();
+		try (FileWriter fout = new FileWriter(archivoSalida)) {
+			fout.write(jsonActualizado.toString(4));
+		}
+	}
 
 }

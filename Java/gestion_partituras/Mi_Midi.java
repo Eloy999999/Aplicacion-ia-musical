@@ -1,15 +1,17 @@
 package gestion_partituras;
 
+import java.nio.file.Path;
+
 public class Mi_Midi {
-	private String ruta_archivo;
+	private Path ruta_archivo;
 	
 	
-	public Mi_Midi(String ruta) {
+	public Mi_Midi(Path ruta) {
 		ruta_archivo = ruta;
 	}
 
 
-	public String getRuta() {
+	public Path getRuta() {
 		return ruta_archivo;
 	}
 	

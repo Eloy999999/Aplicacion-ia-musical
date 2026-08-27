@@ -96,7 +96,7 @@ def remover_nombres_e_instrucciones_pantalla(ruta_xml):
     tree.write(ruta_xml, encoding="UTF-8", xml_declaration=True)
 
 def digitarPartitura():
-    json_raw = sys.stdin.read()
+    json_raw = sys.stdin.readline()
     if not json_raw.strip():
         sys.exit(1)
 
@@ -112,7 +112,7 @@ def digitarPartitura():
         elementos = [el for el in score.recurse().notes if el.isNote or el.isChord]
         idx_digitacion = 0
         total_digitaciones = len(digitaciones)
-
+        cont = 0
         for el in elementos:
             if idx_digitacion >= total_digitaciones:
                 break
@@ -157,6 +157,9 @@ def digitarPartitura():
                 if t_aba:
                     lyr = music21.note.Lyric(text=t_aba, number=1)
                     el.lyrics.append(lyr)
+            if cont % 50 == 0:
+                print(cont)
+            cont += 1
 
         # 1. Exportar MusicXML con music21
         score.write('musicxml', fp=archivo_out)

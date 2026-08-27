@@ -1,20 +1,23 @@
 package gestion_partituras;
 
+import java.io.File;
+import java.nio.file.Path;
+
 public class Partitura {
 	private String nombre_partitura;
 	private int tamanyo;
-	private String ruta_pdf;
+	private Path ruta_pdf;
 //	private AudioMP3 audio;
 	private Mi_MusicXML partitura_MusicXML;
 	private Mi_Midi partitura_Midi;
 	
-	public Partitura(String nombre, String pdf_path, String musicxml) {
+	public Partitura(String nombre, Path pdf_path, Path musicxml) {
 		nombre_partitura = nombre;
 		ruta_pdf = pdf_path;
 		partitura_MusicXML = new Mi_MusicXML(musicxml);
 	}
 
-	public Partitura(String nombre, String pdf_path, String musicxml, String midi) {
+	public Partitura(String nombre, Path pdf_path, Path musicxml, Path midi) {
 		nombre_partitura = nombre;
 		ruta_pdf = pdf_path;
 		partitura_MusicXML = new Mi_MusicXML(musicxml);
@@ -29,7 +32,7 @@ public class Partitura {
 		return tamanyo;
 	}
 
-	public String getRutaPDF() {
+	public Path getRutaPDF() {
 		return ruta_pdf;
 	}
 //
@@ -49,12 +52,8 @@ public class Partitura {
 		nombre_partitura = nombre;
 	}
 	
-	public void setRutaPDF(String nuevaRuta) {
+	public void setRutaPDF(Path nuevaRuta) {
 		ruta_pdf = nuevaRuta;
-	}
-
-	public void eliminaArchivos() {
-		
 	}
 	
 	
