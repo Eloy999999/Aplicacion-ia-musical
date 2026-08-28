@@ -1,5 +1,18 @@
-hola.cpp
-Java/.project
-venv/
-.vscode/settings.json
-Java/bin/
+# Carpetas temporales y de compilación (AQUÍ ESTÁN LOS BINARIOS)
+/build/
+/*/build/
+.gradle/
+/.gradle/
+
+# Archivos de configuración local y claves
+local.properties
+
+# Archivos del entorno e IDE (Android Studio)
+.idea/
+*.iml
+.DS_Store
+
+# Reportes de pruebas
+captures/
+
+app/src/main/java/com/digitarra/Python/
