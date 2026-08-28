@@ -1,0 +1,41 @@
+{
+  "partituras": [
+    {
+      "nombre": "Asturias",
+      "ruta_pdf": "/scores/asturias.pdf",
+      "ruta_xml": "/scores/asturias.xml",
+      "ruta_midi": "/scores/asturias.mid"
+    },
+    {
+      "nombre": "Romance Anónimo",
+      "ruta_pdf": "/scores/romance.pdf",
+      "ruta_xml": "/scores/romance.xml"
+    },
+    {
+      "nombre": "Romancero Gitano",
+      "ruta_pdf": "/scores/romance2.pdf",
+      "ruta_xml": "/scores/romance2.xml"
+    },
+    {
+      "nombre": "Navarra",
+      "ruta_pdf": "/scores/romance2.pdf",
+      "ruta_xml": "/scores/romance2.xml"
+    }
+  ],
+  "colecciones": [
+    {
+      "nombre": "Clásicos de Guitarra",
+      "nombres_partituras": [
+        "Asturias",
+        "Romance Anónimo"
+      ]
+    },
+    {
+      "nombre": "cosos",
+      "nombres_partituras": [
+        "Romancero Gitano",
+        "Navarra"
+      ]
+    }
+  ]
+}
