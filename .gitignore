@@ -16,3 +16,9 @@ local.properties
 captures/
 
 app/src/main/java/com/digitarra/Python/
+
+# Dependencias de Node.js
+js/node_modules/
+js/npm-debug.log*
+js/yarn-debug.log*
+js/yarn-error.log*
