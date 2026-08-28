@@ -1,4 +1,4 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 public class NombreColeccionEnUsoException extends Exception {
     private final String nombreColeccion;

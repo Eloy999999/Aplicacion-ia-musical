@@ -1,12 +1,20 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +33,18 @@ public class BibliotecaPartituras {
 
 	private static final String RUTA_RELATIVA_JSON = "metadatos.json";
 	
-	public BibliotecaPartituras(JSONObject infoPartituras, Context contexto) throws JSONException {
+	public BibliotecaPartituras(Context contexto) throws JSONException, IOException {
 		context = contexto;
 		pathApp = contexto.getFilesDir().toPath();
 
 		partituras = new HashMap<>(10);
 		colecciones = new HashMap<>(10);
+
+		Path pathJSON = pathApp.resolve(RUTA_RELATIVA_JSON);
+
+		String contenido = new String(Files.readAllBytes(pathJSON), StandardCharsets.UTF_8);
+
+		JSONObject infoPartituras = new JSONObject(contenido);
 
 		JSONArray infoPartiturasIndividual = infoPartituras.getJSONArray("partituras");
 		
@@ -63,8 +77,8 @@ public class BibliotecaPartituras {
 		String nombrePartitura = part_i_info.getString("nombre");
 		Path rutaPDF = pathApp.resolve(part_i_info.getString("ruta_pdf"));
 		Path rutaMusicXML = pathApp.resolve(part_i_info.getString("ruta_xml"));
-		if(part_i_info.has("ruta_midi")) {
-			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML, pathApp.resolve(part_i_info.getString("ruta_midi")));
+		if(part_i_info.getBoolean("digitada")) {
+			part = new PartituraDigitada(nombrePartitura, rutaPDF, rutaMusicXML);
 		}
 		else {
 			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML);
@@ -231,6 +245,82 @@ public class BibliotecaPartituras {
 		try (FileWriter fout = new FileWriter(archivoSalida)) {
 			fout.write(jsonActualizado.toString(4));
 		}
+	}
+
+	public Partitura nuevaPartitura(Uri uri) throws IOException, NombrePartituraEnUsoException, ArchivoNoSePudoBorrarException {
+		String nombre = obtenerNombreDesdeUri(uri);
+		Path rutaArchivoAux = pathApp.resolve("temp/"+nombre);
+		try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+			if (inputStream == null) {
+				throw new IOException("No se pudo abrir el archivo origen.");
+			}
+
+			// Copia directa del Stream al Path de destino (reemplaza si ya existe)
+			Files.copy(inputStream, rutaArchivoAux, StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
+
+		String nombreSinExtension = nombre.substring(0, nombre.lastIndexOf("."));
+
+		Path pathXMLNuevo = pathApp.resolve("MusicXML_Files/"+nombreSinExtension+".xml");
+
+
+
+		Path rutaXMLBueno = Paths.get(embajador.convierteAMusicXML(rutaArchivoAux, pathXMLNuevo));
+
+		Path rutaPDF = Paths.get(GeneradorPDF.obtenerPDF(rutaXMLBueno.toString()));
+
+		Partitura part = new Partitura(nombreSinExtension, rutaPDF, rutaXMLBueno);
+		this.insertaPartitura(part);
+
+		if(!rutaArchivoAux.toFile().delete()) {
+			throw new ArchivoNoSePudoBorrarException(rutaArchivoAux.toString());
+		}
+
+		return part;
+	}
+
+	private String obtenerNombreDesdeUri(Uri uri) {
+		String nombre = null;
+
+		// Si el Uri es de tipo content:// (el estándar en SAF y MediaStore)
+		if ("content".equals(uri.getScheme())) {
+			try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+				if (cursor != null && cursor.moveToFirst()) {
+					int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+					if (index != -1) {
+						nombre = cursor.getString(index);
+					}
+				}
+			}
+		}
+
+		// Si la consulta no devuelve nombre o si el Uri es de tipo file:// (rutas antiguas)
+		if (nombre == null) {
+			nombre = uri.getPath();
+			int cut = nombre.lastIndexOf('/');
+			if (cut != -1) {
+				nombre = nombre.substring(cut + 1);
+			}
+		}
+
+		return nombre;
+	}
+
+
+	public void editaPartitura(String nombrePartitura, JSONObject cambiosPartitura) throws PartituraNoExisteException, ArchivoNoSePudoBorrarException {
+		Partitura part = this.getPartitura(nombrePartitura);
+
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
+
+		embajador.editaPartitura(part.getPartitura_MusicXML().getRuta(), cambiosPartitura);
+
+		String rutaPDFNueva = GeneradorPDF.obtenerPDF(part.getPartitura_MusicXML().getRuta().toString());
+
+		part.setRutaPDF(pathApp.resolve(rutaPDFNueva));
+//		part.setMi_MusicXML();
+
 	}
 
 }

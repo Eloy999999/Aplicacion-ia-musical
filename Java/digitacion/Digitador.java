@@ -1,12 +1,19 @@
-package digitacion;
+package com.digitarra.digitacion;
+
+import android.content.Context;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gestion_partituras.EmbajadorMusic21Python;
-import gestion_partituras.Partitura;
-import gestion_partituras.PartituraDigitada;
+import com.digitarra.gestion_partituras.EmbajadorMusic21Python;
+import com.digitarra.gestion_partituras.GeneradorPDF;
+import com.digitarra.gestion_partituras.Partitura;
+import com.digitarra.gestion_partituras.PartituraDigitada;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class Digitador {
@@ -363,12 +370,12 @@ public class Digitador {
 
 	private static final int MAX_CONFIGURACIONES_MANO_DERECHA = 25;
 	
-	public String digitaConAcordes(Partitura partitura) throws NotaDesconocidaException, AcordeLongitudImposibleException, JSONException {
-		String rutaXMLSalida;
+	public PartituraDigitada digitaConAcordes(Partitura partitura, Context context) throws NotaDesconocidaException, AcordeLongitudImposibleException, JSONException, IOException, InterruptedException {
+		Path rutaXMLSalida;
 		
-		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python();
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
 		
-		JSONObject json_in = embajador.getNotas(partitura.getPartitura_Midi().getRuta());
+		JSONObject json_in = embajador.getNotas(partitura.getPartitura_MusicXML().getRuta());
 		
 		JSONArray arrayNotas = json_in.getJSONArray("notas");
 		
@@ -379,13 +386,22 @@ public class Digitador {
 		Configuracion[] posicionesMejor = digitacion_cuerda_traste_acordes_iter(json_in.getJSONArray("notas"), esAcorde);
 		
 		ConfiguracionManos posicionesManosMejor = digitacion_dedos_acordes_iter(posicionesMejor, esAcorde);
-		
+
+		//rutaXMLSalida = context.getFilesDir().toString()+"MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml";
+		rutaXMLSalida = context.getFilesDir().toPath().resolve("MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml");
 		JSONObject json_out = objetoDigitacionSalidaConAcordes(posicionesMejor, posicionesManosMejor, arrayNotas, esAcorde);
-		json_out.put("archivo_in", partitura.getPartitura_Midi().getRuta());
-		json_out.put("archivo_out", "/home/drm/Curso2526/TFG/PartiturasDigitadas/"+partitura.getNombre_partitura()+"digitado.xml");
+		json_out.put("archivo_in", partitura.getPartitura_MusicXML().getRuta().toString());
+		json_out.put("archivo_out", rutaXMLSalida);
 		
 		embajador.digitaPartitura(json_out);
-		return null;
+
+		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
+
+
+
+
+
+		return new PartituraDigitada(partitura.getNombre_partitura() + " DIGITADO", Paths.get(rutaPDF), rutaXMLSalida);
 		
 	}
 	
@@ -400,10 +416,10 @@ public class Digitador {
 	 * @param partitura Partitura de guitarra que no ha sido digitada.
 	 * @return instancia de {@link PartituraDigitada} con la partitura digitada.
 	 */
-	public PartituraDigitada digita(Partitura partitura) throws NotaDesconocidaException {
-		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python();
-		String ruta_xml = "";
-		JSONObject json_in = embajador.getNotas(partitura.getPartitura_Midi().getRuta());
+	public PartituraDigitada digita(Partitura partitura, Context context) throws NotaDesconocidaException, JSONException, IOException, InterruptedException {
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
+		Path rutaXMLSalida = context.getFilesDir().toPath().resolve("MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml");
+		JSONObject json_in = embajador.getNotas(partitura.getPartitura_MusicXML().getRuta());
 		System.out.println("Se leyeron bien las notas");
 //		JSONObject json_out = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
 		
@@ -412,15 +428,15 @@ public class Digitador {
 		Dedo[] dedos_mejor = digitacion_dedos_iter(json_in.getJSONArray("notas"), cuerda_traste_mejor);
 		System.out.println("Se hizo la digitacion");
 		JSONObject infor_digit = this.objetoDigitacionSalida(cuerda_traste_mejor, dedos_mejor, 33, dedos_mejor.length, json_in.getJSONArray("notas"));
-		infor_digit.put("archivo_out", "/home/drm/Curso2526/TFG/PartiturasDigitadas/"+partitura.getNombre_partitura()+"digitado.xml");
+		infor_digit.put("archivo_out", rutaXMLSalida.toString());
 		infor_digit.put("archivo_in", partitura.getPartitura_Midi().getRuta());
 		embajador.digitaPartitura(infor_digit);
 		
 		//TODO:Crear el pdf de la parittura
-		String rutaPdfDigitada = "";
+		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
 		
 		
-		PartituraDigitada resul = new PartituraDigitada(partitura.getNombre_partitura()+"_digitada", rutaPdfDigitada, ruta_xml);
+		PartituraDigitada resul = new PartituraDigitada(partitura.getNombre_partitura()+"_digitada", Paths.get(rutaPDF), rutaXMLSalida);
 		
 		return resul;
 	}
@@ -432,7 +448,7 @@ public class Digitador {
 	 * FUNCIONES PARA DIGITACION CUERDA-TRASTE
 	 */
 	
-	private Configuracion[] digitacion_cuerda_traste_acordes_iter(JSONArray arrayNotas, boolean[] esAcorde) throws NotaDesconocidaException, AcordeLongitudImposibleException {
+	private Configuracion[] digitacion_cuerda_traste_acordes_iter(JSONArray arrayNotas, boolean[] esAcorde) throws NotaDesconocidaException, AcordeLongitudImposibleException, JSONException {
 		int n = arrayNotas.length();
 		PosiblesConfiguraciones[] configs = new PosiblesConfiguraciones[n];
 		
@@ -1239,7 +1255,7 @@ public class Digitador {
 	 * @return Array de Cuerda y traste con los que tocar cada nota haciendo el coste mínimo.
 	 * @throws NotaDesconocidaException 
 	 */
-	private PosGuitarra[] digitacion_cuerda_traste_iter(JSONArray arrayNotas) throws NotaDesconocidaException {
+	private PosGuitarra[] digitacion_cuerda_traste_iter(JSONArray arrayNotas) throws NotaDesconocidaException, JSONException {
 		
 		int n = arrayNotas.length();
 		
@@ -1809,16 +1825,15 @@ public class Digitador {
 	 * @param dedosFinal dedos con los que tocar cada nota de la partitura
 	 * @param mejorCoste Coste de la digitación
 	 * @param numNotasYTrastes Numero de notas y acordes en la partitura
-	 * @param rutaArchivoNuevo Ruta en la que se quiere guardar en MusicXML con la partitura digitada
 	 * @return {@link JSONObject} con la información de la digitación.
 	 */
-	private JSONObject objetoDigitacionSalida(PosGuitarra[] digitacionFinal, Dedo[] dedosFinal, int mejorCoste, int numNotasYTrastes, JSONArray arraynotas) {
+	private JSONObject objetoDigitacionSalida(PosGuitarra[] digitacionFinal, Dedo[] dedosFinal, int mejorCoste, int numNotasYTrastes, JSONArray arraynotas) throws JSONException {
 		JSONObject json_salida = new JSONObject();
 		
 		JSONArray arrayDigitacion = new JSONArray();
 		
 		for(int i = 0; i < digitacionFinal.length; i++) {
-			arrayDigitacion.put("%d,%d,%d,%c".formatted(digitacionFinal[i].getCuerda(), digitacionFinal[i].getTraste(), 
+			arrayDigitacion.put(String.format("%d,%d,%d,%c", digitacionFinal[i].getCuerda(), digitacionFinal[i].getTraste(),
 																dedosFinal[i].getDedo_izq(), getDedoDerecho_char(dedosFinal[i].getDedo_der())));
 		}
 		
@@ -1831,7 +1846,7 @@ public class Digitador {
 		return json_salida;
 	}
 	
-	private JSONObject objetoDigitacionSalidaConAcordes(Configuracion[] digitacionFinal, ConfiguracionManos dedosFinal, JSONArray arrayNotas, boolean[] esAcorde) {
+	private JSONObject objetoDigitacionSalidaConAcordes(Configuracion[] digitacionFinal, ConfiguracionManos dedosFinal, JSONArray arrayNotas, boolean[] esAcorde) throws JSONException {
 		JSONObject json_salida = new JSONObject();
 		
 		JSONArray arrayDigitacion = new JSONArray();
@@ -1842,16 +1857,16 @@ public class Digitador {
 				PosGuitarra[] configAcordeCT = digitacionFinal[i].getConfigAcorde();
 				int[] configAcordeManoIzq = dedosFinal.getConfigManoIzq(i).getConfigAcorde();
 				int[] configAcordeManoDer = dedosFinal.getConfigManoDer(i).getConfigAcorde();
-				stringAcorde.append("%d,%d,%d,%c".formatted(configAcordeCT[0].getCuerda(), configAcordeCT[0].getTraste(),
+				stringAcorde.append(String.format("%d,%d,%d,%c", configAcordeCT[0].getCuerda(), configAcordeCT[0].getTraste(),
 													configAcordeManoIzq[0], getDedoDerecho_char(configAcordeManoDer[0])));
 				for(int j = 1; j < configAcordeCT.length; j++) {
-					stringAcorde.append("+%d,%d,%d,%c".formatted(configAcordeCT[j].getCuerda(), configAcordeCT[j].getTraste(),
+					stringAcorde.append(String.format("+%d,%d,%d,%c", configAcordeCT[j].getCuerda(), configAcordeCT[j].getTraste(),
 							configAcordeManoIzq[j], getDedoDerecho_char(configAcordeManoDer[j])));
 				}
 				arrayDigitacion.put(stringAcorde.toString());
 			}
 			else {
-				arrayDigitacion.put("%d,%d,%d,%c".formatted(digitacionFinal[i].getConfigNota().getCuerda(), digitacionFinal[i].getConfigNota().getTraste(), 
+				arrayDigitacion.put(String.format("%d,%d,%d,%c", digitacionFinal[i].getConfigNota().getCuerda(), digitacionFinal[i].getConfigNota().getTraste(),
 						dedosFinal.getConfigManoIzq(i).getConfigNota(), getDedoDerecho_char(dedosFinal.getConfigManoDer(i).getConfigNota())));
 			}
 		}

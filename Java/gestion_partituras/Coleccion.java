@@ -1,4 +1,4 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 import java.util.ArrayList;
 import java.util.HashMap;

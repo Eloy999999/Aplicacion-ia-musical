@@ -1,4 +1,4 @@
-package digitacion;
+package com.digitarra.digitacion;
 
 public class NotaDesconocidaException extends Exception {
 	private String notaInalcanzable;

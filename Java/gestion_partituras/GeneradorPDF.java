@@ -1,10 +1,10 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 public class GeneradorPDF {
     
 
 
-    public String ObtenerPDF(String rutaXML){
+    public static String obtenerPDF(String rutaXML){
 
 
 

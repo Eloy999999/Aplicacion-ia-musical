@@ -95,8 +95,8 @@ def remover_nombres_e_instrucciones_pantalla(ruta_xml):
 
     tree.write(ruta_xml, encoding="UTF-8", xml_declaration=True)
 
-def digitarPartitura():
-    json_raw = sys.stdin.readline()
+def digitarPartitura(json_raw: str) -> str:
+    #json_raw = sys.stdin.readline()
     if not json_raw.strip():
         sys.exit(1)
 
@@ -173,5 +173,5 @@ def digitarPartitura():
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
-if __name__ == "__main__":
-    digitarPartitura()
+#if __name__ == "__main__":
+#    digitarPartitura()

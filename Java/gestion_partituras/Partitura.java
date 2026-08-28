@@ -1,4 +1,4 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -47,12 +47,21 @@ public class Partitura {
 	public Mi_Midi getPartitura_Midi() {
 		return partitura_Midi;
 	}
+
+	public void setMi_MusicXML(Path nuevoXML) throws ArchivoNoSePudoBorrarException {
+		this.getPartitura_MusicXML().setRuta(nuevoXML);
+	}
 	
 	public void setNombre(String nombre) {
 		nombre_partitura = nombre;
 	}
 	
-	public void setRutaPDF(Path nuevaRuta) {
+	public void setRutaPDF(Path nuevaRuta) throws ArchivoNoSePudoBorrarException {
+		File f = ruta_pdf.toFile();
+		boolean seElimino = f.delete();
+		if(!seElimino) {
+			throw new ArchivoNoSePudoBorrarException(ruta_pdf.getFileName().toString());
+		}
 		ruta_pdf = nuevaRuta;
 	}
 	

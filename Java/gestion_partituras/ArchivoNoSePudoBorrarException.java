@@ -1,4 +1,4 @@
-package gestion_partituras;
+package com.digitarra.gestion_partituras;
 
 public class ArchivoNoSePudoBorrarException extends Exception {
     private final String archivoImposible;

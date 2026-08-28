@@ -1,4 +1,4 @@
-package digitacion;
+package com.digitarra.digitacion;
 
 public class AcordeLongitudImposibleException extends Exception {
 	private String acorde;
