@@ -12,14 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App_TFG">
         <activity
-            android:name=".MainActivity"
+            android:name="com.digitarra.gui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.App_TFG"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

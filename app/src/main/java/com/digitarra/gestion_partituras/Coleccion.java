@@ -1,5 +1,7 @@
 package com.digitarra.gestion_partituras;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,5 +58,17 @@ public class Coleccion {
 	
 	public List<Partitura> getAllPartituras() {
 		return new ArrayList<Partitura>(partituras.values());
+	}
+
+	public void añadePartituras(List<Partitura> partituras) {
+		for(Partitura p : partituras) {
+			this.añadePartitura(p.getNombre_partitura(), p);
+		}
+	}
+
+	public void quitarPartituras(List<Partitura> partituras) {
+		for(Partitura p : partituras) {
+			this.quitarPartitura(p.getNombre_partitura());
+		}
 	}
 }

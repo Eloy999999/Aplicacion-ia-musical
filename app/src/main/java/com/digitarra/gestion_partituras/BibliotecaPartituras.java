@@ -233,10 +233,28 @@ public class BibliotecaPartituras {
 		return resul;
 	}
 
-
+	public List<Partitura> getPartiturasSinColeccion() {
+		List<Partitura> resul = new ArrayList<>(10);
+		for(Partitura p : partituras.values()) {
+			boolean estaEnColeccion = false;
+			for(Coleccion c : colecciones.values()) {
+				if(c.contienePartitura(p.getNombre_partitura())) {
+					estaEnColeccion = true;
+				}
+			}
+			if(!estaEnColeccion) {
+				resul.add(p);
+			}
+		}
+		return resul;
+	}
 
 	public List<String> getNombresColecciones() {
 		return new ArrayList<>(colecciones.keySet());
+	}
+
+	public List<Coleccion> getAllColecciones() {
+		return new ArrayList<>(colecciones.values());
 	}
 	
 	public void cierraBiblioteca() throws JSONException, IOException {
