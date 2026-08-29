@@ -166,7 +166,8 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasDigitadas() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-			if(PartituraDigitada.class.isInstance(p)) {
+//			if(PartituraDigitada.class.isInstance(p)) {
+			if(p.isDigitada()) {
 				resul.add(p);
 			}
 		}
