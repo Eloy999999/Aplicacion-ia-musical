@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 import com.example.digitarra.Java.gestion_partituras.EmbajadorMusic21Python;
 import com.example.digitarra.Java.gestion_partituras.Partitura;
-import com.example.digitarra.Java.gestion_partituras.PartituraDigitada;
+//import com.example.digitarra.Java.gestion_partituras.PartituraDigitada;
 
 
 public class Digitador {
@@ -400,9 +400,9 @@ public class Digitador {
 	 * y devuelva la ruta del nuevo archivo MusicXML con la digitacion. Tras ello crea un nuevo objeto PartituraDigitada y lo devuelve.
 	 * 
 	 * @param partitura Partitura de guitarra que no ha sido digitada.
-	 * @return instancia de {@link PartituraDigitada} con la partitura digitada.
+	 * @return instancia de {@link Partitura} con la partitura digitada.
 	 */
-	public PartituraDigitada digita(Partitura partitura) throws NotaDesconocidaException, JSONException {
+	public Partitura digita(Partitura partitura) throws NotaDesconocidaException, JSONException {
 		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python();
 		String ruta_xml = "";
 		JSONObject json_in = embajador.getNotas(partitura.getPartitura_Midi().getRuta());
@@ -422,7 +422,7 @@ public class Digitador {
 		String rutaPdfDigitada = "";
 		
 		
-		PartituraDigitada resul = new PartituraDigitada(partitura.getNombre_partitura()+"_digitada", rutaPdfDigitada, ruta_xml);
+		Partitura resul = new Partitura(partitura.getNombre_partitura()+"_digitada", rutaPdfDigitada, ruta_xml, true);
 		
 		return resul;
 	}

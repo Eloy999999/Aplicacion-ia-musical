@@ -23,7 +23,7 @@ public class Main{
 
             if (Files.exists(path)) {
                 //System.out.println("La ruta1 es válida y el archivo/directorio EXISTE.");
-				Partitura part = new Partitura("PruebaMidi","","",archivo_midi_pruebas);
+				Partitura part = new Partitura("PruebaMidi","","",archivo_midi_pruebas, false);
 		
 
 				Digitador digit = new Digitador();

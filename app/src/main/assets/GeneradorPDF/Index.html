@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="opensheetmusicdisplay.min.js"></script>
+    <script src="html2pdf.bundle.min.js"></script>
+    <script>
+        async function convertMusicXmlToPdfAndroid(xmlString, outputFileName) {
+          const container = document.createElement('div');
+          container.style.width = '800px';
+          container.style.background = '#ffffff';
+          document.body.appendChild(container);
+
+          try {
+            const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
+              autoResize: false,
+              drawTitle: false,
+              drawComposer: false,
+              drawFingerings: true,
+              fingeringPosition: "left",
+              drawStringNumbers: true,
+              fingeringInsideStaff: false
+            });
+
+            await osmd.load(xmlString);
+            osmd.render();
+
+            const options = {
+              margin: [15, 10, 15, 10],
+              filename: outputFileName,
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            const pdfBase64 = await html2pdf().set(options).from(container).outputPdf('datauristring');
+            const base64Data = pdfBase64.split(',')[1];
+
+            if (window.AndroidBridge && window.AndroidBridge.guardarPdf) {
+              window.AndroidBridge.guardarPdf(base64Data, outputFileName);
+            }
+          } catch (error) {
+            console.error('Error al generar PDF en JS:', error);
+            if (window.AndroidBridge && window.AndroidBridge.guardarPdf) {
+              window.AndroidBridge.guardarPdf(null, outputFileName);
+            }
+          } finally {
+            if (document.body.contains(container)) {
+              document.body.removeChild(container);
+            }
+          }
+        }
+    </script>
+</head>
+<body>
+</body>
+</html>

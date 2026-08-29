@@ -58,11 +58,15 @@ public class BibliotecaPartituras {
 		String nombrePartitura = part_i_info.getString("nombre");
 		String rutaPDF = part_i_info.getString("ruta_pdf");
 		String rutaMusicXML = part_i_info.getString("ruta_xml");
+
+		// Lee el booleano 'digitada'. Si no existe en el JSON, asigna false por defecto
+		boolean digitada = part_i_info.optBoolean("digitada", false);
+
 		if(part_i_info.has("ruta_midi")) {
-			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML, part_i_info.getString("ruta_midi"));
+			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML, part_i_info.getString("ruta_midi"), digitada);
 		}
 		else {
-			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML);
+			part = new Partitura(nombrePartitura, rutaPDF, rutaMusicXML, digitada);
 		}
 		return part;
 	}
@@ -77,8 +81,52 @@ public class BibliotecaPartituras {
 	}
 
 	public void insertaPartitura(Partitura nuevaPartitura) {
-		if(!partituras.containsKey(nuevaPartitura.getNombre_partitura())) {
+		if (nuevaPartitura == null) return;
+
+		// 1. Añadir al HashMap en memoria
+		if (!partituras.containsKey(nuevaPartitura.getNombre_partitura())) {
 			partituras.put(nuevaPartitura.getNombre_partitura(), nuevaPartitura);
+		}
+
+		// 2. Sincronizar con el JSONObject interno (infoPartis)
+		try {
+			JSONArray partiturasArray = infoPartis.optJSONArray("partituras");
+			if (partiturasArray == null) {
+				partiturasArray = new JSONArray();
+				infoPartis.put("partituras", partiturasArray);
+			}
+
+			// Verificar si ya existe en el JSONArray para actualizar o añadir
+			JSONObject objPartitura = null;
+			for (int i = 0; i < partiturasArray.length(); i++) {
+				JSONObject pObj = partiturasArray.getJSONObject(i);
+				if (pObj.getString("nombre").equals(nuevaPartitura.getNombre_partitura())) {
+					objPartitura = pObj;
+					break;
+				}
+			}
+
+			// Si no existe, crear uno nuevo
+			if (objPartitura == null) {
+				objPartitura = new JSONObject();
+				objPartitura.put("nombre", nuevaPartitura.getNombre_partitura());
+				partiturasArray.put(objPartitura);
+			}
+
+			// Asignar las rutas requeridas y el flag digitada
+			objPartitura.put("ruta_pdf", nuevaPartitura.getRutaPDF());
+			objPartitura.put("digitada", nuevaPartitura.isDigitada());
+
+			if (nuevaPartitura.getPartitura_MusicXML() != null) {
+				objPartitura.put("ruta_xml", nuevaPartitura.getPartitura_MusicXML().getRuta());
+			}
+
+			if (nuevaPartitura.getPartitura_Midi() != null) {
+				objPartitura.put("ruta_midi", nuevaPartitura.getPartitura_Midi().getRuta());
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -89,7 +137,7 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasSinDigitar() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-			if(!PartituraDigitada.class.isInstance(p)) {
+			if(!p.isDigitada()) {
 				resul.add(p);
 			}
 		}
@@ -99,7 +147,7 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasDigitadas() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-			if(PartituraDigitada.class.isInstance(p)) {
+			if(p.isDigitada()) {
 				resul.add(p);
 			}
 		}
@@ -354,6 +402,59 @@ public class BibliotecaPartituras {
 						}
 						colObj.put("nombres_partituras", nuevoNombresArray);
 						break;
+					}
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void eliminarPartitura(String nombrePartitura) {
+		Partitura p = partituras.get(nombrePartitura);
+		if (p == null) return;
+
+		// 1. Elimina archivos internos de la app (PDF, XML, MIDI)
+		p.eliminaArchivos();
+
+		// 2. Elimina de la memoria interna
+		partituras.remove(nombrePartitura);
+
+		// 3. Elimina de las colecciones en memoria
+		for (Coleccion c : colecciones.values()) {
+			if (c.getPartituras() != null) {
+				c.quitarPartitura(nombrePartitura);
+			}
+		}
+
+		// 4. Elimina del JSON en memoria (infoPartis)
+		try {
+			JSONArray partiturasArray = infoPartis.optJSONArray("partituras");
+			if (partiturasArray != null) {
+				JSONArray nuevoArray = new JSONArray();
+				for (int i = 0; i < partiturasArray.length(); i++) {
+					JSONObject pObj = partiturasArray.getJSONObject(i);
+					if (!pObj.getString("nombre").equalsIgnoreCase(nombrePartitura)) {
+						nuevoArray.put(pObj);
+					}
+				}
+				infoPartis.put("partituras", nuevoArray);
+			}
+
+			JSONArray coleccionesArray = infoPartis.optJSONArray("colecciones");
+			if (coleccionesArray != null) {
+				for (int i = 0; i < coleccionesArray.length(); i++) {
+					JSONObject colObj = coleccionesArray.getJSONObject(i);
+					JSONArray nombresArray = colObj.optJSONArray("nombres_partituras");
+					if (nombresArray != null) {
+						JSONArray nuevoNombresArray = new JSONArray();
+						for (int j = 0; j < nombresArray.length(); j++) {
+							String nombreActual = nombresArray.getString(j);
+							if (!nombreActual.equalsIgnoreCase(nombrePartitura)) {
+								nuevoNombresArray.put(nombreActual);
+							}
+						}
+						colObj.put("nombres_partituras", nuevoNombresArray);
 					}
 				}
 			}

@@ -14,7 +14,7 @@ public class PruebasInterconexion {
 	
 	
 	public static void main(String[] args) {
-		Partitura part = new Partitura("perfect", "", "RUTA_ARCHIVO_PRUEBA", RUTA_ARCHIVO_PRUEBA);
+		Partitura part = new Partitura("perfect", "", "RUTA_ARCHIVO_PRUEBA", RUTA_ARCHIVO_PRUEBA, false);
 		Digitador digit = new Digitador();
 		try {
 //			JSONObject info = digit.digita(part);
