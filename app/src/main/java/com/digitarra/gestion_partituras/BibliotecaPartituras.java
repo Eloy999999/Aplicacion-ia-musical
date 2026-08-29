@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
 
+import com.digitarra.digitacion.AcordeLongitudImposibleException;
 import com.digitarra.digitacion.Digitador;
 import com.digitarra.digitacion.NotaDesconocidaException;
 
@@ -152,12 +153,12 @@ public class BibliotecaPartituras {
 		return resul;
 	}
 
-	public void digitaPartitura(String nombrePartitura) throws NombrePartituraEnUsoException, PartituraNoExisteException, NotaDesconocidaException, JSONException, IOException, InterruptedException {
+	public void digitaPartitura(String nombrePartitura) throws NombrePartituraEnUsoException, PartituraNoExisteException, NotaDesconocidaException, JSONException, IOException, InterruptedException, AcordeLongitudImposibleException {
 		Digitador digit = new Digitador();
 
 		Partitura partituraSinDigitar = this.getPartitura(nombrePartitura);
 
-		PartituraDigitada resul = digit.digita(partituraSinDigitar, context);
+		PartituraDigitada resul = digit.digitaConAcordes(partituraSinDigitar, context);
 
 		this.insertaPartitura(resul);
 	}
