@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.digitarra"
+    namespace = "com.digitarra.app_tfg"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.digitarra"
+        applicationId = "com.example.app_tfg"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

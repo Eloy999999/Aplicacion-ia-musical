@@ -1,6 +1,24 @@
+# Carpetas temporales y de compilación (AQUÍ ESTÁN LOS BINARIOS)
+/build/
+/*/build/
 .gradle/
-.idea/
-build/
-app/build/
+/.gradle/
+
+# Archivos de configuración local y claves
 local.properties
+
+# Archivos del entorno e IDE (Android Studio)
+.idea/
 *.iml
+.DS_Store
+
+# Reportes de pruebas
+captures/
+
+app/src/main/java/com/digitarra/Python/
+
+# Dependencias de Node.js
+app/src/main/assets/js/node_modules/
+app/src/main/assets/js/npm-debug.log*
+app/src/main/assets/js/yarn-debug.log*
+app/src/main/assets/js/yarn-error.log*

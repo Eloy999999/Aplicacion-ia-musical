@@ -22,7 +22,8 @@ dependencyResolutionManagement {
         mavenCentral()
         maven { url = uri("https://chaquo.com/maven") }
     }
+
 }
 
-rootProject.name = "Digitarra"
+rootProject.name = "App_TFG"
 include(":app")
