@@ -1,11 +1,14 @@
 package com.digitarra.gui
 
+import android.net.Uri
 import com.digitarra.app_tfg.R
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,17 +21,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import com.digitarra.gestion_partituras.BibliotecaPartituras
 import com.digitarra.gestion_partituras.Coleccion
 import com.digitarra.gestion_partituras.Partitura
-import org.json.JSONObject
-import java.io.File
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +47,62 @@ class MainActivity : ComponentActivity() {
                 var refrescoKey by remember { mutableIntStateOf(0) }
 
                 //val context = LocalContext.current
+
+                // Registrar el launcher para seleccionar archivos XML o MIDI
+                val filePickerLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.OpenDocument()
+                ) { uri: Uri? ->
+                    uri?.let {
+                        try {
+                            //val nombreOriginal = obtenerNombreArchivo(it)
+                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
+
+                            Toast.makeText(
+                                context,
+                                "Generando PDF, por favor espera...",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            val creadorPartituras = CreadorPartituras(this)
+
+                            lifecycleScope.launch {
+                                // Le pasas la URI directamente sin importar si es XML o MIDI
+                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca)
+
+
+
+                                resultado.fold(
+                                    onSuccess = {
+                                        val temp = biblioteca
+                                        biblioteca = null
+                                        biblioteca = temp
+                                        refrescoKey++
+                                        pantallaActual = 1
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Partitura añadida con éxito",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    onFailure = { error ->
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Error: ${error.message}",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                )
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            Toast.makeText(
+                                context,
+                                "Error al procesar el archivo: ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
@@ -113,7 +171,7 @@ class MainActivity : ComponentActivity() {
                                             coleccionActiva?.let { col ->
                                                 // 1. Guardar cambios
 //                                                biblioteca?.quitarPartiturasDeColeccion(col.nombre, partiturasAQuitar)
-                                                col.quitarPartituras(partiturasAQuitar);
+                                                col.quitarPartituras(partiturasAQuitar)
 //                                                biblioteca?.guardarCambiosEnJson(context)
 
                                                 // 2. Refrescar la referencia activa
@@ -128,6 +186,42 @@ class MainActivity : ComponentActivity() {
 //                                            biblioteca?.guardarCambiosEnJson(context)
                                             if (coleccionActiva == coleccion) coleccionActiva = null
                                             refrescoKey++
+                                        },
+                                        // --- NUEVAS ACCIONES ---
+                                        onVisualizarPartitura = { partitura ->
+                                            Toast.makeText(context, "Visualizando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
+                                            val visualizador = VisorPDF(this@MainActivity)
+                                            visualizador.visualizarPDF(partitura)
+                                            // TODO: Abrir pantalla de visualización del PDF
+                                        },
+                                        onDigitarPartitura = { partitura ->
+                                            Toast.makeText(context, "Digitando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
+                                            // TODO: Iniciar proceso de digitación
+                                        },
+                                        onEditarPartitura = { partitura ->
+                                            Toast.makeText(context, "Editando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
+                                            // TODO: Abrir pantalla de edición
+                                        },
+                                        onEliminarPartitura = { partitura ->
+                                            // 1. Elimina archivos internos, HashMap y entradas del JSON
+                                            biblioteca?.eliminaPartitura(partitura.nombre_partitura)
+
+                                            // 2. Persiste los cambios en el archivo Partituras.json en disco
+//                      biblioteca                      biblioteca?.guardarCambiosEnJson(context)
+
+                                            // 3. Si estábamos dentro de una colección, refrescamos su referencia en memoria
+                                            coleccionActiva?.let { col ->
+                                                coleccionActiva = biblioteca?.getColeccion(col.nombre)
+                                            }
+
+                                            // 4. Forzamos el redibujado de Compose
+                                            refrescoKey++
+
+                                            Toast.makeText(
+                                                context,
+                                                "Partitura \"${partitura.nombre_partitura}\" eliminada",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     )
                                 }
@@ -135,7 +229,16 @@ class MainActivity : ComponentActivity() {
                             2 -> PantallaOpcionesAgregar(
                                 onVolverClick = { pantallaActual = 1 },
                                 onOpcion1Click = { /* Añadir por audio */ },
-                                onOpcion2Click = { /* Añadir por xml/midi */ }
+                                onOpcion2Click = {
+                                    // Tipos MIME filtrados para archivos XML y MIDI
+                                    val mimeTypes = arrayOf(
+                                        "text/xml",
+                                        "application/xml",
+                                        "audio/midi",
+                                        "audio/x-midi"
+                                    )
+                                    filePickerLauncher.launch(mimeTypes)
+                                }
                             )
                         }
                     }
@@ -192,7 +295,10 @@ fun PantallaBiblioteca(
     onAgregarPartiturasAColeccion: (List<Partitura>) -> Unit,
     onQuitarPartiturasDeColeccion: (List<Partitura>) -> Unit, // Nueva lambda
     onBorrarColeccion: (Coleccion) -> Unit,
-    onPartituraClick: (Partitura) -> Unit = {}
+    onVisualizarPartitura: (Partitura) -> Unit = {},
+    onDigitarPartitura: (Partitura) -> Unit = {},
+    onEditarPartitura: (Partitura) -> Unit = {},
+    onEliminarPartitura: (Partitura) -> Unit = {}
 ) {
     val colecciones = if (coleccionSeleccionada == null) biblioteca?.allColecciones ?: emptyList() else emptyList()
     val partiturasAMostrar = if (coleccionSeleccionada != null) {
@@ -337,31 +443,94 @@ fun PantallaBiblioteca(
                 }
 
                 items(partiturasAMostrar, key = { it.nombre_partitura }) { partitura ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clickable { onPartituraClick(partitura) },
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(
+                    var menuExpandido by remember { mutableStateOf(false) }
+
+                    Box {
+                        Card(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                                .clickable { menuExpandido = true },
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.partitura),
-                                contentDescription = "Icono Partitura",
-                                modifier = Modifier.size(56.dp)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(12.dp)
+                            ) {
+                                // Contenido central (Icono y Nombre)
+                                Column(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.partitura),
+                                        contentDescription = "Icono Partitura",
+                                        modifier = Modifier.size(56.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = partitura.nombre_partitura,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                // Etiqueta abajo a la izquierda
+                                Text(
+                                    text = if (partitura.isDigitada) "Digitada: Sí" else "Digitada: No",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (partitura.isDigitada)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                    modifier = Modifier.align(Alignment.BottomStart)
+                                )
+                            }
+                        }
+
+                        // Menú con las opciones al clicar la tarjeta
+                        DropdownMenu(
+                            expanded = menuExpandido,
+                            onDismissRequest = { menuExpandido = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Visualizar") },
+                                onClick = {
+                                    menuExpandido = false
+                                    onVisualizarPartitura(partitura)
+                                }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = partitura.nombre_partitura,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                textAlign = TextAlign.Center
+
+                            // La opción "Digitar" solo aparece si NO está digitada
+                            if (!partitura.isDigitada) {
+                                DropdownMenuItem(
+                                    text = { Text("Digitar") },
+                                    onClick = {
+                                        menuExpandido = false
+                                        onDigitarPartitura(partitura)
+                                    }
+                                )
+                            }
+
+                            DropdownMenuItem(
+                                text = { Text("Editar") },
+                                onClick = {
+                                    menuExpandido = false
+                                    onEditarPartitura(partitura)
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
+                                onClick = {
+                                    menuExpandido = false
+                                    onEliminarPartitura(partitura)
+                                }
                             )
                         }
                     }
@@ -430,6 +599,108 @@ fun ItemColeccion(
                 onClick = {
                     menuExpandido = false
                     onBorrar()
+                }
+            )
+        }
+    }
+}
+
+// Componente individual para la Partitura con menú de opciones
+@Composable
+fun ItemPartitura(
+    partitura: Partitura,
+    onVisualizar: () -> Unit,
+    onDigitar: () -> Unit,
+    onEditar: () -> Unit,
+    onEliminar: () -> Unit
+) {
+    var menuExpandido by remember { mutableStateOf(false) }
+
+    Box {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clickable { menuExpandido = true },
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp)
+            ) {
+                // Contenido central (Icono y Nombre)
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.partitura),
+                        contentDescription = "Icono Partitura",
+                        modifier = Modifier.size(56.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = partitura.nombre_partitura,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                // Etiqueta abajo a la izquierda
+                Text(
+                    text = if (partitura.isDigitada) "Digitada: Sí" else "Digitada: No",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (partitura.isDigitada)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.align(Alignment.BottomStart)
+                )
+            }
+        }
+
+        // Menú emergente de opciones al hacer clic
+        DropdownMenu(
+            expanded = menuExpandido,
+            onDismissRequest = { menuExpandido = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Visualizar") },
+                onClick = {
+                    menuExpandido = false
+                    onVisualizar()
+                }
+            )
+
+            // Solo mostrar la opción "Digitar" si no ha sido digitada previamente
+            if (!partitura.isDigitada) {
+                DropdownMenuItem(
+                    text = { Text("Digitar") },
+                    onClick = {
+                        menuExpandido = false
+                        onDigitar()
+                    }
+                )
+            }
+
+            DropdownMenuItem(
+                text = { Text("Editar") },
+                onClick = {
+                    menuExpandido = false
+                    onEditar()
+                }
+            )
+
+            DropdownMenuItem(
+                text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
+                onClick = {
+                    menuExpandido = false
+                    onEliminar()
                 }
             )
         }

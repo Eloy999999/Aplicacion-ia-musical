@@ -32,44 +32,76 @@ public class BibliotecaPartituras {
 
 	private Path pathApp;
 
+	private Path pathXMLs;
+
+	private Path pathPDFs;
+
+	private Path pathTemps;
+
 	private Context context;
+
+	private GeneradorPDF generadorPDFs;
 
 	private static final String RUTA_RELATIVA_JSON = "metadatos.json";
 	
 	public BibliotecaPartituras(Context contexto) throws JSONException, IOException {
 		context = contexto;
 		pathApp = contexto.getFilesDir().toPath();
+		generadorPDFs = new GeneradorPDF(context);
 
 		partituras = new HashMap<>(10);
 		colecciones = new HashMap<>(10);
 
 		Path pathJSON = pathApp.resolve(RUTA_RELATIVA_JSON);
 
-		String contenido = new String(Files.readAllBytes(pathJSON), StandardCharsets.UTF_8);
+		pathXMLs = pathApp.resolve("MusicXML_Files");
 
-		JSONObject infoPartituras = new JSONObject(contenido);
+		pathTemps = pathApp.resolve("temp");
 
-		JSONArray infoPartiturasIndividual = infoPartituras.getJSONArray("partituras");
-		
-		for(int i = 0; i < infoPartiturasIndividual.length(); i++) {
-			JSONObject part_i_info = infoPartiturasIndividual.getJSONObject(i);
-			Partitura partitura = parseaPartitura(part_i_info);
-			
-			partituras.put(partitura.getNombre_partitura(), partitura);
+		pathPDFs = pathApp.resolve("PDFs");
+
+		if(!(Files.exists(pathXMLs) && Files.isDirectory(pathXMLs))) {
+			Files.createDirectories(pathXMLs);
 		}
-		
-		JSONArray infoColecciones = infoPartituras.getJSONArray("colecciones");
-		
-		for(int i = 0; i < infoColecciones.length(); i++) {
-			JSONObject colec_i_info = infoColecciones.getJSONObject(i);
-			JSONArray nombrePartituras = colec_i_info.getJSONArray("nombres_partituras");
-			List<Partitura> listaPartituras = new ArrayList<Partitura>();
-			for(int j = 0; j < nombrePartituras.length(); j++) {
-				listaPartituras.add(partituras.get(nombrePartituras.getString(j)));
+
+		if(!(Files.exists(pathTemps) && Files.isDirectory(pathTemps))) {
+			Files.createDirectories(pathTemps);
+		}
+
+		if(!(Files.exists(pathPDFs) && Files.isDirectory(pathPDFs))) {
+			Files.createDirectories(pathPDFs);
+		}
+
+
+		if(Files.exists(pathJSON)) {
+			String contenido = new String(Files.readAllBytes(pathJSON), StandardCharsets.UTF_8);
+
+			JSONObject infoPartituras = new JSONObject(contenido);
+
+			JSONArray infoPartiturasIndividual = infoPartituras.getJSONArray("partituras");
+
+			for(int i = 0; i < infoPartiturasIndividual.length(); i++) {
+				JSONObject part_i_info = infoPartiturasIndividual.getJSONObject(i);
+				Partitura partitura = parseaPartitura(part_i_info);
+
+				partituras.put(partitura.getNombre_partitura(), partitura);
 			}
-			Coleccion colecc = new Coleccion(colec_i_info.getString("nombre"), listaPartituras);
-			colecciones.put(colecc.getNombre(), colecc);
+
+			JSONArray infoColecciones = infoPartituras.getJSONArray("colecciones");
+
+			for(int i = 0; i < infoColecciones.length(); i++) {
+				JSONObject colec_i_info = infoColecciones.getJSONObject(i);
+				JSONArray nombrePartituras = colec_i_info.getJSONArray("nombres_partituras");
+				List<Partitura> listaPartituras = new ArrayList<Partitura>();
+				for(int j = 0; j < nombrePartituras.length(); j++) {
+					listaPartituras.add(partituras.get(nombrePartituras.getString(j)));
+				}
+				Coleccion colecc = new Coleccion(colec_i_info.getString("nombre"), listaPartituras);
+				colecciones.put(colecc.getNombre(), colecc);
+			}
 		}
+
+
 	}
 
 
@@ -112,7 +144,8 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasSinDigitar() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-			if(!PartituraDigitada.class.isInstance(p)) {
+//			if(!PartituraDigitada.class.isInstance(p)) {
+			if(!p.isDigitada()) {
 				resul.add(p);
 			}
 		}
@@ -297,7 +330,7 @@ public class BibliotecaPartituras {
 
 	public Partitura nuevaPartitura(Uri uri) throws IOException, NombrePartituraEnUsoException, ArchivoNoSePudoBorrarException {
 		String nombre = obtenerNombreDesdeUri(uri);
-		Path rutaArchivoAux = pathApp.resolve("temp/"+nombre);
+		Path rutaArchivoAux = pathTemps.resolve(nombre);
 		try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
 			if (inputStream == null) {
 				throw new IOException("No se pudo abrir el archivo origen.");
@@ -307,24 +340,27 @@ public class BibliotecaPartituras {
 			Files.copy(inputStream, rutaArchivoAux, StandardCopyOption.REPLACE_EXISTING);
 		}
 
+
+
 		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
 
 		String nombreSinExtension = nombre.substring(0, nombre.lastIndexOf("."));
 
-		Path pathXMLNuevo = pathApp.resolve("MusicXML_Files/"+nombreSinExtension+".xml");
+		Path pathXMLNuevo = pathXMLs.resolve(nombreSinExtension+".xml");
 
-
+		System.out.println(nombreSinExtension);
 
 		Path rutaXMLBueno = Paths.get(embajador.convierteAMusicXML(rutaArchivoAux, pathXMLNuevo));
 
-		Path rutaPDF = Paths.get(GeneradorPDF.obtenerPDF(rutaXMLBueno.toString()));
+		//Path rutaPDF = Paths.get(generadorPDFs.obtenerPDF(rutaXMLBueno.toString()));
+		Path rutaPDF = Paths.get(generadorPDFs.obtenerPDF(rutaXMLBueno.toString(), pathPDFs.resolve(nombreSinExtension+".pdf").toString()));
 
 		Partitura part = new Partitura(nombreSinExtension, rutaPDF, rutaXMLBueno);
 		this.insertaPartitura(part);
 
-		if(!rutaArchivoAux.toFile().delete()) {
-			throw new ArchivoNoSePudoBorrarException(rutaArchivoAux.toString());
-		}
+//		if(!rutaArchivoAux.toFile().delete()) {
+//			throw new ArchivoNoSePudoBorrarException(rutaArchivoAux.toString());
+//		}
 
 		return part;
 	}
@@ -356,6 +392,12 @@ public class BibliotecaPartituras {
 		return nombre;
 	}
 
+	public void digitar(Partitura part) throws NombrePartituraEnUsoException, NotaDesconocidaException, JSONException, IOException, InterruptedException {
+		Digitador digit = new Digitador();
+		Partitura partNueva = digit.digita(part, context);
+		this.insertaPartitura(partNueva);
+	}
+
 
 	public void editaPartitura(String nombrePartitura, JSONObject cambiosPartitura) throws PartituraNoExisteException, ArchivoNoSePudoBorrarException {
 		Partitura part = this.getPartitura(nombrePartitura);
@@ -364,9 +406,9 @@ public class BibliotecaPartituras {
 
 		embajador.editaPartitura(part.getPartitura_MusicXML().getRuta(), cambiosPartitura);
 
-		String rutaPDFNueva = GeneradorPDF.obtenerPDF(part.getPartitura_MusicXML().getRuta().toString());
-
-		part.setRutaPDF(pathApp.resolve(rutaPDFNueva));
+		//String rutaPDFNueva = GeneradorPDF.obtenerPDF(part.getPartitura_MusicXML().getRuta().toString());
+		generadorPDFs.obtenerPDF(part.getPartitura_MusicXML().getRuta().toString(), part.getRutaPDF().toString());
+		//part.setRutaPDF(pathApp.resolve(rutaPDFNueva));
 //		part.setMi_MusicXML();
 
 	}

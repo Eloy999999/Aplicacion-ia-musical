@@ -18,7 +18,7 @@ captures/
 app/src/main/java/com/digitarra/Python/
 
 # Dependencias de Node.js
-js/node_modules/
-js/npm-debug.log*
-js/yarn-debug.log*
-js/yarn-error.log*
+app/src/main/assets/js/node_modules/
+app/src/main/assets/js/npm-debug.log*
+app/src/main/assets/js/yarn-debug.log*
+app/src/main/assets/js/yarn-error.log*

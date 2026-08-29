@@ -10,11 +10,21 @@ public class Partitura {
 //	private AudioMP3 audio;
 	private Mi_MusicXML partitura_MusicXML;
 	private Mi_Midi partitura_Midi;
+
+	private boolean isDigitada;
 	
 	public Partitura(String nombre, Path pdf_path, Path musicxml) {
 		nombre_partitura = nombre;
 		ruta_pdf = pdf_path;
 		partitura_MusicXML = new Mi_MusicXML(musicxml);
+		isDigitada = false;
+	}
+
+	public Partitura(String nombre, Path pdf_path, Path musicxml, boolean digitada) {
+		nombre_partitura = nombre;
+		ruta_pdf = pdf_path;
+		partitura_MusicXML = new Mi_MusicXML(musicxml);
+		isDigitada = digitada;
 	}
 
 	public Partitura(String nombre, Path pdf_path, Path musicxml, Path midi) {
@@ -64,6 +74,9 @@ public class Partitura {
 		}
 		ruta_pdf = nuevaRuta;
 	}
-	
+
+	public boolean isDigitada() {
+		return isDigitada;
+	}
 	
 }

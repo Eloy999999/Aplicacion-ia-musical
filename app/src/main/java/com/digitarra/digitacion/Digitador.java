@@ -395,7 +395,9 @@ public class Digitador {
 		
 		embajador.digitaPartitura(json_out);
 
-		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
+		GeneradorPDF generadorPDF = new GeneradorPDF(context);
+
+		String rutaPDF = generadorPDF.obtenerPDF(rutaXMLSalida.toString(), context.getFilesDir().toPath().resolve("PDFs/"+partitura.getNombre_partitura()+"digitada.pdf").toString());
 
 
 
@@ -433,8 +435,8 @@ public class Digitador {
 		embajador.digitaPartitura(infor_digit);
 		
 		//TODO:Crear el pdf de la parittura
-		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
-		
+//		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
+		String rutaPDF = "PERE";
 		
 		PartituraDigitada resul = new PartituraDigitada(partitura.getNombre_partitura()+"_digitada", Paths.get(rutaPDF), rutaXMLSalida);
 		

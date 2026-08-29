@@ -19,10 +19,10 @@ import org.json.JSONObject;
 public class EmbajadorMusic21Python {
 	
 	//private final String RUTA_SCRIPT_LECTORNOTAS_PY = "/home/drm/git/Aplicacion-ia-musical/Python/LectorNotas.py";
-	private final String RUTA_SCRIPT_LECTORNOTAS_PY = "LectorNotas.py";
-	private final String RUTA_SCRIPT_DIGITACION_PY = "DigitarPartitura.py";
+	private final String RUTA_SCRIPT_LECTORNOTAS_PY = "LectorNotas";
+	private final String RUTA_SCRIPT_DIGITACION_PY = "DigitarPartitura";
 
-	private final String RUTA_SCRIPT_CONVERSOR = "Conversor.py";
+	private final String RUTA_SCRIPT_CONVERSOR = "Conversor";
     private final String RUTA_INTERPRETE = "venv/bin/python3";
 	private final String RUTA_LOG = "/home/drm/git/Aplicacion-ia-musical/Python/log.txt";
 
