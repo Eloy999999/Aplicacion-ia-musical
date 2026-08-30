@@ -88,7 +88,7 @@ public class EmbajadorMusic21Python {
 //		if(codRet != 0) {
 //			System.out.println("Error en el script python" + codRet);
 //		}
-    	PyObject salida = py.getModule(RUTA_SCRIPT_DIGITACION_PY).callAttr("digitar_partitura", info_digitacion.toString());
+    	PyObject salida = py.getModule(RUTA_SCRIPT_DIGITACION_PY).callAttr("digitarPartitura", info_digitacion.toString());
     	
     }
 

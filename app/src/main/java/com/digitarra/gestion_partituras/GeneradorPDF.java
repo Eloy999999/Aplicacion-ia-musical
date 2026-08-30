@@ -29,33 +29,35 @@ public class GeneradorPDF {
         CountDownLatch latch = new CountDownLatch(1);
         final boolean[] exito = {false};
 
-        // Forzar normalización de la ruta de salida (convertir \ en /)
         final String rutaPDFNormalizada = rutaPDF.replace("\\", "/");
         final String rutaXMLNormalizada = rutaXML.replace("\\", "/");
 
-        new Handler(Looper.getMainLooper()).post(() -> {
+        new Handler(Looper.getMainLooper()).post(() -> { // Se ejecuta aqui con el hilo principal porque el WebView lo requiere
             try {
-                // 1. Leer contenido del XML
+                // Leer y apuntar contenido del xml
                 byte[] xmlBytes = Files.readAllBytes(Paths.get(rutaXMLNormalizada));
                 String xmlContent = new String(xmlBytes, StandardCharsets.UTF_8);
 
+                // Escapar caracteres para JavaScript en xmlContent
                 String xmlEscapado = xmlContent
                         .replace("\\", "\\\\")
                         .replace("'", "\\'")
                         .replace("\n", "\\n")
                         .replace("\r", "");
 
-                // 2. Configurar WebView
+                // Configurar WebView
                 WebView webView = new WebView(context);
                 WebSettings settings = webView.getSettings();
                 settings.setJavaScriptEnabled(true);
                 settings.setDomStorageEnabled(true);
                 settings.setAllowFileAccess(true);
 
-                // 3. Registrar UN SOLO puente Javascript que escriba en rutaPDF
-                webView.addJavascriptInterface(new Object() {
+                webView.clearCache(true);
+                settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+                webView.addJavascriptInterface(new Object() { // Define el puente con js
                     @JavascriptInterface
-                    public void guardarPdf(String base64Data, String outputFileName) {
+                    public void guardarPdf(String base64Data, String outputFileName) { // lo llama Index.html para ya regresar
                         if (base64Data != null && !base64Data.isEmpty()) {
                             try {
                                 byte[] pdfBytes = Base64.decode(base64Data, Base64.DEFAULT);
@@ -75,22 +77,19 @@ public class GeneradorPDF {
                                 e.printStackTrace();
                             }
                         }
-                        // Liberar el hilo de espera en cualquier caso
-                        latch.countDown();
+                        latch.countDown(); // Soltar latch, el WebView finaliza
                     }
                 }, "AndroidBridge");
 
-                // 4. Cargar la página e inyectar el script
                 webView.setWebViewClient(new WebViewClient() {
                     @Override
-                    public void onPageFinished(WebView view, String url) {
+                    public void onPageFinished(WebView view, String url) { // Una vez cargado Index.html, lo ejecuta
                         String script = String.format("convertMusicXmlToPdfAndroid('%s', '%s');",
                                 xmlEscapado, new File(rutaPDFNormalizada).getName());
                         webView.evaluateJavascript(script, null);
                     }
                 });
-
-                webView.loadUrl("file:///android_asset/js/Index.html");
+                webView.loadUrl("file:///android_asset/js/Index.html"); // Cargar html con js
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -99,8 +98,7 @@ public class GeneradorPDF {
         });
 
         try {
-            // Esperar la respuesta del puente JS
-            latch.await();
+            latch.await(); // Esperar que se termine de escribir el PDF en disco
         } catch (InterruptedException e) {
             e.printStackTrace();
             return null;

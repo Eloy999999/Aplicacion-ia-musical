@@ -32,6 +32,7 @@ public class Partitura {
 		ruta_pdf = pdf_path;
 		partitura_MusicXML = new Mi_MusicXML(musicxml);
 		partitura_Midi = new Mi_Midi(midi);
+		isDigitada = false;
 	}
 
 	public String getNombre_partitura() {
@@ -77,6 +78,10 @@ public class Partitura {
 
 	public boolean isDigitada() {
 		return isDigitada;
+	}
+
+	public void markDigitada(){
+		this.isDigitada = true;
 	}
 	
 }

@@ -43,19 +43,14 @@ def archivo_a_notas(nombre_archivo: str) -> list[str]:
 
     return notas
 
-#if __name__ == "__main__": # Pasamos ruta del midi / musicxml recibido, sus notas/acordes y cuantos tiene en un JSON
 def json_notas(ruta_archivo: str) -> str:
-    #archivo_midi = sys.argv[1] if len(sys.argv) > 1 else "pruebamidi.mid"
-    #print(sys.argv[1])
-    lista_notas = archivo_a_notas(archivo_midi)
+    # Se utiliza el parámetro ruta_archivo recibido por la función
+    lista_notas = archivo_a_notas(ruta_archivo)
 
     datos = { # Encapsulamos la informacion dentro de un diccionario para un JSON bien estructurado
-        "archivo": archivo_midi,
+        "archivo": ruta_archivo,
         "total_notas": len(lista_notas),
         "notas": lista_notas
     }
-
-    #print(json.dumps(datos))
-    #sys.stdout.flush()
 
     return json.dumps(datos)

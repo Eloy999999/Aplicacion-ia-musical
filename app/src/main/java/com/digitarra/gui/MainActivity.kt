@@ -32,7 +32,13 @@ import com.digitarra.gestion_partituras.Coleccion
 import com.digitarra.gestion_partituras.Partitura
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 class MainActivity : ComponentActivity() {
+
+    private var bibliotecaInstancia: BibliotecaPartituras? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val context = this
         super.onCreate(savedInstanceState)
@@ -47,6 +53,10 @@ class MainActivity : ComponentActivity() {
                 var refrescoKey by remember { mutableIntStateOf(0) }
 
                 //val context = LocalContext.current
+
+                LaunchedEffect(biblioteca) {
+                    bibliotecaInstancia = biblioteca
+                }
 
                 // Registrar el launcher para seleccionar archivos XML o MIDI
                 val filePickerLauncher = rememberLauncherForActivityResult(
@@ -187,16 +197,39 @@ class MainActivity : ComponentActivity() {
                                             if (coleccionActiva == coleccion) coleccionActiva = null
                                             refrescoKey++
                                         },
-                                        // --- NUEVAS ACCIONES ---
+
                                         onVisualizarPartitura = { partitura ->
                                             Toast.makeText(context, "Visualizando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
                                             val visualizador = VisorPDF(this@MainActivity)
                                             visualizador.visualizarPDF(partitura)
-                                            // TODO: Abrir pantalla de visualización del PDF
                                         },
                                         onDigitarPartitura = { partitura ->
-                                            Toast.makeText(context, "Digitando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
-                                            // TODO: Iniciar proceso de digitación
+                                            Toast.makeText(context, "Digitando partitura, por favor espera...", Toast.LENGTH_SHORT).show()
+
+                                            lifecycleScope.launch(Dispatchers.IO) {
+                                                try {
+                                                    android.util.Log.d("DIGITARRA_DEBUG", "PASO 1: Iniciando digitacion")
+
+                                                    biblioteca?.digitaPartitura(partitura.nombre_partitura)
+
+                                                    android.util.Log.d("DIGITARRA_DEBUG", "PASO 2: Digitación finalizada con éxito")
+
+                                                    withContext(Dispatchers.Main) {
+                                                        val temp = biblioteca
+                                                        biblioteca = null
+                                                        biblioteca = temp
+
+                                                        coleccionActiva?.let { col ->
+                                                            coleccionActiva = biblioteca?.getColeccion(col.nombre)
+                                                        }
+
+                                                        refrescoKey++
+                                                    }
+                                                } catch (t: Throwable) {
+                                                    // Captura tanto Exception como Error (incluidos fallos de librerías nativas)
+                                                    android.util.Log.e("DIGITARRA_DEBUG", "ERROR FATAL CAPTURADO: ${t.message}", t)
+                                                }
+                                            }
                                         },
                                         onEditarPartitura = { partitura ->
                                             Toast.makeText(context, "Editando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
@@ -244,6 +277,26 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    // Se ejecuta al MINIMIZAR la app (segundo plano)
+    override fun onStop() {
+        super.onStop()
+        cerrarRecursos()
+    }
+
+    // Se ejecuta al CERRAR por completo la app
+    override fun onDestroy() {
+        super.onDestroy()
+        cerrarRecursos()
+    }
+
+    private fun cerrarRecursos() {
+        try {
+            bibliotecaInstancia?.cierraBiblioteca()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

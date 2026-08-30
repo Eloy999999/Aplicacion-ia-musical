@@ -160,6 +160,7 @@ public class BibliotecaPartituras {
 
 		PartituraDigitada resul = digit.digitaConAcordes(partituraSinDigitar, context);
 
+
 		this.insertaPartitura(resul);
 	}
 	
@@ -302,6 +303,7 @@ public class BibliotecaPartituras {
 			objetoPartitura.put("nombre", nombre);
 			objetoPartitura.put("ruta_pdf", pathApp.relativize(partitura.getRutaPDF()).toString());
 			objetoPartitura.put("ruta_xml", pathApp.relativize(partitura.getPartitura_MusicXML().getRuta()).toString());
+			objetoPartitura.put("digitada", partitura.isDigitada());
 
 			arrayPartituras.put(objetoPartitura);
 		}
