@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="opensheetmusicdisplay.min.js"></script> // Renderiza codigo MusicXML en graficos SVG (partituras).
+    <script src="html2pdf.bundle.min.js"></script> // Captura el contenido visual renderizado en el navegador y lo pasa a PDF.
+    <script>
+        async function convertMusicXmlToPdfAndroid(xmlString, outputFileName) {
+            // Hoja donde se dibujara la partitura
+            const container = document.createElement('div');
+            container.style.width = '660px';
+            container.style.background = '#ffffff';
+            container.style.padding = '5px';
+            container.style.boxSizing = 'border-box';
+            document.body.appendChild(container);
+
+            try {
+                const osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, { // Definir, cargar y renderizar osmd
+                    autoResize: false,
+                    drawTitle: false,
+                    drawComposer: false,
+                    drawPartNames: false,
+                    drawFingerings: true,
+                    fingeringPosition: "left",
+                    drawStringNumbers: true,
+                    fingeringInsideStaff: false
+                });
+
+                await osmd.load(xmlString);
+
+                osmd.zoom = 0.65; // mas pequenio el zoom para que quepan mas notas
+                osmd.render();
+
+                const options = { // Opciones del generador PDF
+                    margin: [8, 8, 8, 8],
+                    filename: outputFileName,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                const pdfBase64 = await html2pdf().set(options).from(container).outputPdf('datauristring');
+                const base64Data = pdfBase64.split(',')[1];
+
+                if (window.AndroidBridge && window.AndroidBridge.guardarPdf) {
+                    window.AndroidBridge.guardarPdf(base64Data, outputFileName);
+                }
+            } catch (error) {
+                console.error('Error en JS:', error);
+                if (window.AndroidBridge && window.AndroidBridge.guardarPdf) {
+                    window.AndroidBridge.guardarPdf(null, outputFileName);
+                }
+            } finally {
+                if (document.body.contains(container)) {
+                    document.body.removeChild(container);
+                }
+            }
+        }
+    </script>
+</head>
+<body style="margin: 0; padding: 0; background: #ffffff;">
+</body>
+</html>
