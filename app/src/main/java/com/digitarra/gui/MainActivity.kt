@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.digitarra.gestion_partituras.BibliotecaPartituras
 import com.digitarra.gestion_partituras.Coleccion
+import com.digitarra.gestion_partituras.DigitacionNota
+import com.digitarra.gestion_partituras.GeneradorPDF
 import com.digitarra.gestion_partituras.Partitura
 import kotlinx.coroutines.launch
 
@@ -48,6 +51,9 @@ class MainActivity : ComponentActivity() {
                 var pantallaActual by remember { mutableStateOf(0) }
                 var biblioteca by remember { mutableStateOf<BibliotecaPartituras?>(null) }
                 var coleccionActiva by remember { mutableStateOf<Coleccion?>(null) }
+
+                var partituraAEditar by remember { mutableStateOf<Partitura?>(null) }
+                var listaDigitacionesAEditar by remember { mutableStateOf<List<DigitacionNota>>(emptyList()) }
 
                 // Variable de estado para forzar el redibujado de Compose al modificar la biblioteca
                 var refrescoKey by remember { mutableIntStateOf(0) }
@@ -207,11 +213,8 @@ class MainActivity : ComponentActivity() {
 
                                             lifecycleScope.launch(Dispatchers.IO) {
                                                 try {
-                                                    android.util.Log.d("DIGITARRA_DEBUG", "PASO 1: Iniciando digitacion")
 
                                                     biblioteca?.digitaPartitura(partitura.nombre_partitura)
-
-                                                    android.util.Log.d("DIGITARRA_DEBUG", "PASO 2: Digitación finalizada con éxito")
 
                                                     withContext(Dispatchers.Main) {
                                                         val temp = biblioteca
@@ -223,16 +226,52 @@ class MainActivity : ComponentActivity() {
                                                         }
 
                                                         refrescoKey++
+                                                        Toast.makeText(this@MainActivity, "Partitura digitada con éxito", Toast.LENGTH_SHORT).show()
                                                     }
-                                                } catch (t: Throwable) {
-                                                    // Captura tanto Exception como Error (incluidos fallos de librerías nativas)
-                                                    android.util.Log.e("DIGITARRA_DEBUG", "ERROR FATAL CAPTURADO: ${t.message}", t)
+                                                } catch (t: Throwable) { // Error durante la digitacion
+
+                                                    val mensajeError = when (t) {
+                                                        is com.digitarra.digitacion.AcordeLongitudImposibleException ->
+                                                            "No se pudo digitar: La partitura contiene un acorde imposible de ejecutar en guitarra."
+                                                        else ->
+                                                            "No se pudo digitar: ${t.localizedMessage ?: "Error desconocido"}"
+                                                    }
+
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(this@MainActivity, mensajeError, Toast.LENGTH_LONG).show()
+                                                    }
                                                 }
                                             }
                                         },
                                         onEditarPartitura = { partitura ->
-                                            Toast.makeText(context, "Editando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
-                                            // TODO: Abrir pantalla de edición
+                                            Toast.makeText(context, "Cargando datos de ${partitura.nombre_partitura}...", Toast.LENGTH_SHORT).show()
+
+                                            // 1. Asignamos la partitura seleccionada al estado
+                                            partituraAEditar = partitura
+
+                                            // 2. Cargamos las notas en segundo plano para no congelar la UI
+                                            lifecycleScope.launch(Dispatchers.IO) {
+                                                try {
+                                                    val digitaciones = biblioteca?.obtenerDigitacionesPartitura(partitura.nombre_partitura) ?: emptyList()
+
+                                                    withContext(Dispatchers.Main) {
+                                                        // 3. Guardamos las digitaciones cargadas
+                                                        listaDigitacionesAEditar = digitaciones
+
+                                                        // 4. Cambiamos el estado para navegar a la pantalla 3 (Edición)
+                                                        pantallaActual = 3
+                                                    }
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            "Error al abrir edición: ${e.message}",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
+                                                }
+                                            }
                                         },
                                         onEliminarPartitura = { partitura ->
                                             // 1. Elimina archivos internos, HashMap y entradas del JSON
@@ -272,6 +311,49 @@ class MainActivity : ComponentActivity() {
                                     filePickerLauncher.launch(mimeTypes)
                                 }
                             )
+                            3 -> {
+                                val partituraActual = partituraAEditar
+
+                                if (partituraActual != null) {
+                                    PantallaEditarPartitura(
+                                        partitura = partituraActual,
+                                        listaDigitaciones = listaDigitacionesAEditar,
+                                        onVolver = { pantallaActual = 1 },
+                                        onGuardarCambios = { nuevasDigitaciones ->
+                                            Toast.makeText(context, "Guardando digitación...", Toast.LENGTH_SHORT).show()
+
+                                            lifecycleScope.launch(Dispatchers.IO) {
+                                                try {
+                                                    // 1. Guarda los cambios en el archivo MusicXML a través del script de Python
+                                                    biblioteca?.actualizarDigitacionesMusicXML(
+                                                        partituraActual.nombre_partitura,
+                                                        nuevasDigitaciones
+                                                    )
+
+                                                    // 2. Si tu objeto partituraActual o tu ViewModel guarda las digitaciones,
+                                                    // actualiza la variable de estado local aquí.
+                                                    // Si las lees directamente del archivo XML al abrir la pantalla,
+                                                    // no necesitas asignar 'partituraActual.listaDigitaciones'.
+
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(this@MainActivity, "Guardado con éxito", Toast.LENGTH_SHORT).show()
+                                                        // Cambiar el valor del refresco fuerza a Jetpack Compose a releer los datos actualizados del XML/BD
+                                                        refrescoKey++
+                                                        pantallaActual = 1
+                                                    }
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                    withContext(Dispatchers.Main) {
+                                                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    )
+                                } else {
+                                    pantallaActual = 1
+                                }
+                            }
                         }
                     }
                 }
@@ -1020,4 +1102,434 @@ fun DialogoQuitarPartiturasDeColeccion(
             }
         }
     )
+}
+
+
+
+
+
+
+
+
+
+
+// Editar partitura
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PantallaEditarPartitura(
+    partitura: Partitura,
+    listaDigitaciones: List<DigitacionNota>,
+    onVolver: () -> Unit,
+    onGuardarCambios: (List<DigitacionNota>) -> Unit
+) {
+    val estadoDigitaciones =
+        remember { mutableStateListOf(*listaDigitaciones.toTypedArray()) }
+
+    val estaDigitada = partitura.isDigitada
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Editar: ${partitura.nombre_partitura}") },
+                navigationIcon = {
+                    IconButton(onClick = onVolver) {
+                        Icon(
+                            painterResource(id = R.drawable.volver),
+                            contentDescription = "Volver"
+                        )
+                    }
+                },
+                actions = {
+                    Button(
+                        onClick = { onGuardarCambios(estadoDigitaciones) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text("Guardar")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+
+            if (!estaDigitada) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Partitura no digitada: Puedes modificar las notas (alturas), pero la edición de digitación permanecerá bloqueada hasta que la digites.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                itemsIndexed(estadoDigitaciones) { index, item ->
+
+                    var mostrarDialogoNota by remember {
+                        mutableStateOf(false)
+                    }
+
+                    /*
+                     * Separamos las notas.
+                     *
+                     * Ejemplo:
+                     * "do2" -> ["do2"]
+                     * "do2,mi2,sol2" -> ["do2", "mi2", "sol2"]
+                     */
+                    val notas = item.nombreNota
+                        .split(",")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 2.dp
+                        )
+                    ) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp)
+                        ) {
+
+                            // -------------------------
+                            // CABECERA
+                            // -------------------------
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Text(
+                                    text = "Compás ${item.compas}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                OutlinedButton(
+                                    onClick = {
+                                        mostrarDialogoNota = true
+                                    }
+                                ) {
+                                    Text(
+                                        text = "Nota: ${item.nombreNota}",
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // -------------------------
+                            // DIGITACIÓN
+                            // -------------------------
+
+                            notas.forEachIndexed { numeroNota, nota ->
+
+                                if (notas.size > 1) {
+                                    Text(
+                                        text = "Nota ${numeroNota + 1}: $nota",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(
+                                            bottom = 4.dp
+                                        )
+                                    )
+                                }
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+
+                                    SelectorDropdown(
+                                        etiqueta = "D.Izq",
+                                        valorActual = item.dedoIzquierdo,
+                                        opciones = listOf(
+                                            "",
+                                            "0",
+                                            "1",
+                                            "2",
+                                            "3",
+                                            "4"
+                                        ),
+                                        enabled = estaDigitada,
+                                        modifier = Modifier.weight(1f),
+                                        onSeleccion = { nuevoDedo ->
+
+                                            estadoDigitaciones[index] =
+                                                item.copy(
+                                                    dedoIzquierdo = nuevoDedo
+                                                )
+                                        }
+                                    )
+
+                                    SelectorDropdown(
+                                        etiqueta = "Traste",
+                                        valorActual = item.traste,
+                                        opciones = listOf("") +
+                                                (0..19).map { it.toString() },
+                                        enabled = estaDigitada,
+                                        modifier = Modifier.weight(1f),
+                                        onSeleccion = { nuevoTraste ->
+
+                                            estadoDigitaciones[index] =
+                                                item.copy(
+                                                    traste = nuevoTraste
+                                                )
+                                        }
+                                    )
+
+                                    SelectorDropdown(
+                                        etiqueta = "Cuerda",
+                                        valorActual = item.cuerda,
+                                        opciones = listOf(
+                                            "",
+                                            "1",
+                                            "2",
+                                            "3",
+                                            "4",
+                                            "5",
+                                            "6"
+                                        ),
+                                        enabled = estaDigitada,
+                                        modifier = Modifier.weight(1f),
+                                        onSeleccion = { nuevaCuerda ->
+
+                                            estadoDigitaciones[index] =
+                                                item.copy(
+                                                    cuerda = nuevaCuerda
+                                                )
+                                        }
+                                    )
+
+                                    SelectorDropdown(
+                                        etiqueta = "D.Der",
+                                        valorActual = item.manoDerecha,
+                                        opciones = listOf(
+                                            "",
+                                            "p",
+                                            "i",
+                                            "m",
+                                            "a",
+                                            "c"
+                                        ),
+                                        enabled = estaDigitada,
+                                        modifier = Modifier.weight(1f),
+                                        onSeleccion = { nuevoDedoDer ->
+
+                                            estadoDigitaciones[index] =
+                                                item.copy(
+                                                    manoDerecha = nuevoDedoDer
+                                                )
+                                        }
+                                    )
+                                }
+
+                                if (numeroNota < notas.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(
+                                            vertical = 10.dp
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // -------------------------
+                    // DIÁLOGO PARA CAMBIAR NOTA
+                    // -------------------------
+
+                    if (mostrarDialogoNota) {
+
+                        var textoNota by remember {
+                            mutableStateOf(item.nombreNota)
+                        }
+
+                        var mensajeError by remember {
+                            mutableStateOf<String?>(null)
+                        }
+
+                        val numeroNotasEsperadas =
+                            notas.size
+
+                        AlertDialog(
+                            onDismissRequest = {
+                                mostrarDialogoNota = false
+                            },
+
+                            title = {
+                                Text(
+                                    if (numeroNotasEsperadas > 1)
+                                        "Modificar Acorde"
+                                    else
+                                        "Modificar Nota"
+                                )
+                            },
+
+                            text = {
+
+                                OutlinedTextField(
+                                    value = textoNota,
+
+                                    onValueChange = {
+                                        textoNota = it
+                                        mensajeError = null
+                                    },
+
+                                    label = {
+                                        Text("Alturas de la(s) nota(s)")
+                                    },
+
+                                    isError = mensajeError != null,
+
+                                    supportingText = {
+
+                                        if (mensajeError != null) {
+                                            Text(
+                                                text = mensajeError!!,
+                                                color = MaterialTheme.colorScheme.error
+                                            )
+                                        } else {
+                                            Text(
+                                                if (numeroNotasEsperadas > 1)
+                                                    "Introduce $numeroNotasEsperadas notas separadas por comas (Ej: do4,mi4,sol4)"
+                                                else
+                                                    "Ejemplo: do3, fa#3, mib2"
+                                            )
+                                        }
+                                    },
+
+                                    singleLine = true
+                                )
+                            },
+
+                            confirmButton = {
+
+                                Button(
+                                    onClick = {
+
+                                        val textoLimpio =
+                                            textoNota
+                                                .replace(" ", "")
+                                                .lowercase()
+
+                                        val listaNotasIngresadas =
+                                            textoLimpio.split(",")
+
+                                        val regexNotaIndividual =
+                                            Regex(
+                                                "(?i)^(do|re|mi|fa|sol|la|si)[#b♯♭]?[0-9]?$"
+                                            )
+
+                                        if (
+                                            listaNotasIngresadas.size !=
+                                            numeroNotasEsperadas
+                                        ) {
+
+                                            mensajeError =
+                                                "Debes introducir exactamente $numeroNotasEsperadas notas separadas por comas."
+
+                                        } else if (
+                                            !listaNotasIngresadas.all {
+                                                regexNotaIndividual.matches(it)
+                                            }
+                                        ) {
+
+                                            mensajeError =
+                                                "Una o más notas tienen un formato inválido (Ej: do4,mi4,sol4)."
+
+                                        } else {
+
+                                            estadoDigitaciones[index] =
+                                                item.copy(
+                                                    nombreNota = textoLimpio
+                                                )
+
+                                            mostrarDialogoNota = false
+                                        }
+                                    }
+                                ) {
+                                    Text("Aceptar")
+                                }
+                            },
+
+                            dismissButton = {
+
+                                TextButton(
+                                    onClick = {
+                                        mostrarDialogoNota = false
+                                    }
+                                ) {
+                                    Text("Cancelar")
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// SelectorDropdown actualizado para recibir el parámetro `enabled`
+@Composable
+fun SelectorDropdown(
+    etiqueta: String,
+    valorActual: String,
+    opciones: List<String>,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier,
+    onSeleccion: (String) -> Unit
+) {
+    var expandido by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        OutlinedButton(
+            onClick = { expandido = true },
+            enabled = enabled,
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = if (valorActual.isEmpty()) etiqueta else "$etiqueta:$valorActual",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        DropdownMenu(
+            expanded = expandido && enabled,
+            onDismissRequest = { expandido = false }
+        ) {
+            opciones.forEach { opcion ->
+                DropdownMenuItem(
+                    text = { Text(if (opcion.isEmpty()) "Ninguno" else opcion) },
+                    onClick = {
+                        onSeleccion(opcion)
+                        expandido = false
+                    }
+                )
+            }
+        }
+    }
 }
