@@ -234,6 +234,8 @@ class MainActivity : ComponentActivity() {
                                                     val mensajeError = when (t) {
                                                         is com.digitarra.digitacion.AcordeLongitudImposibleException ->
                                                             "No se pudo digitar: La partitura contiene un acorde imposible de ejecutar en guitarra."
+                                                        is com.digitarra.digitacion.NotaDesconocidaException ->
+                                                            "No se pudo digitar: la partitura contiene una nota imposible de ejecutar: ${t.notaInalcanzable}"
                                                         else ->
                                                             "No se pudo digitar: ${t.localizedMessage ?: "Error desconocido"}"
                                                     }
