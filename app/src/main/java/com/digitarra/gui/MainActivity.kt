@@ -307,6 +307,8 @@ class MainActivity : ComponentActivity() {
                                     val mimeTypes = arrayOf(
                                         "text/xml",
                                         "application/xml",
+                                        "text/mxl",
+                                        "application/mxl",
                                         "audio/midi",
                                         "audio/x-midi"
                                     )

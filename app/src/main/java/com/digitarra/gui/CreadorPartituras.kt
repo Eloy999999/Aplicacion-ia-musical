@@ -36,6 +36,7 @@ class CreadorPartituras(private val context: Context) {
 //                        xmlConvertidoFile.writeText("<!-- XML generado desde $nombreOriginal -->")
                         val emabaj = EmbajadorMusic21Python(context)
                         emabaj.convierteAMusicXML(midiGuardado.toPath(), xmlConvertidoFile.toPath())
+                        while(!xmlConvertidoFile.exists() || xmlConvertidoFile.length() == 0L);
                     }
                     Pair(xmlConvertidoFile.absolutePath, midiGuardado.absolutePath)
                 }
@@ -45,6 +46,7 @@ class CreadorPartituras(private val context: Context) {
             // Generar PDF
             val pdfFile = File(context.filesDir, "PDFs/$nombreSinExtension.pdf")
             val generador = GeneradorPDF(context)
+
             val rutaPdfGenerada = generador.obtenerPDF(xmlPath, pdfFile.absolutePath)
             val rutaPDF = rutaPdfGenerada ?: pdfFile.absolutePath
 

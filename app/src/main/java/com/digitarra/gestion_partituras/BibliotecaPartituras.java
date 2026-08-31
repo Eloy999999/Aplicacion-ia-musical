@@ -437,132 +437,74 @@ public class BibliotecaPartituras {
 
 	}
 
-	public void actualizarDigitacionesMusicXML(
-			String nombrePartitura,
-			List<DigitacionNota> nuevasDigitaciones) throws Exception {
+	public void actualizarDigitacionesMusicXML(String nombrePartitura, List<DigitacionNota> nuevasDigitaciones) throws Exception {
 
 		Partitura part = this.getPartitura(nombrePartitura);
 
-		String rutaXML =
-				part.getPartitura_MusicXML()
-						.getRuta()
-						.toString();
+		String rutaXML = part.getPartitura_MusicXML().getRuta().toString();
 
 		JSONArray arrayDigitaciones = new JSONArray();
-
-		// IMPORTANTE:
-		// NO agrupamos aquí las notas de los acordes.
-		// Mandamos cada DigitacionNota por separado.
-		//
-		// Ejemplo:
-		// E8N0 -> do2
-		// E8N1 -> mi2
-		// E8N2 -> sol2
-		//
-		// EditorPartituras.py será quien las vuelva a agrupar.
 
 		for (DigitacionNota datos : nuevasDigitaciones) {
 
 			JSONObject obj = new JSONObject();
 
-			obj.put(
-					"idNota",
-					datos.getIdNota()
-			);
+			obj.put("idNota", datos.getIdNota());
 
-			obj.put(
-					"nombreNota",
-					datos.getNombreNota()
-			);
+			obj.put("nombreNota", datos.getNombreNota());
 
-			obj.put(
-					"compas",
-					datos.getCompas()
-			);
+			obj.put("compas", datos.getCompas());
 
-			obj.put(
-					"dedoIzquierdo",
-					datos.getDedoIzquierdo()
-			);
+			obj.put("dedoIzquierdo", datos.getDedoIzquierdo());
 
-			obj.put(
-					"traste",
-					datos.getTraste()
-			);
+			obj.put("traste", datos.getTraste());
 
-			obj.put(
-					"cuerda",
-					datos.getCuerda()
-			);
+			obj.put("cuerda", datos.getCuerda());
 
-			obj.put(
-					"manoDerecha",
-					datos.getManoDerecha()
-			);
+			obj.put("manoDerecha", datos.getManoDerecha());
 
 			arrayDigitaciones.put(obj);
 		}
 
 		JSONObject cambiosJSON = new JSONObject();
 
-		cambiosJSON.put(
-				"digitaciones",
-				arrayDigitaciones
-		);
+		cambiosJSON.put("digitaciones", arrayDigitaciones);
 
-		EmbajadorMusic21Python embajador =
-				new EmbajadorMusic21Python(context);
-
-		embajador.editaPartitura(
-				part.getPartitura_MusicXML().getRuta(),
-				cambiosJSON
-		);
-
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
+		File archivoXML = part.getPartitura_MusicXML().getRuta().toFile();
+		long ultima_mod = archivoXML.lastModified();
+		embajador.editaPartitura(part.getPartitura_MusicXML().getRuta(), cambiosJSON);
+		while(ultima_mod == archivoXML.lastModified());
 		// Regenerar PDF
-		generadorPDFs.obtenerPDF(
-				rutaXML,
-				part.getRutaPDF().toString()
-		);
+		generadorPDFs.obtenerPDF(rutaXML, part.getRutaPDF().toString());
 	}
 
-	public List<DigitacionNota> obtenerDigitacionesPartitura(
-			String nombrePartitura) throws Exception {
+	public List<DigitacionNota> obtenerDigitacionesPartitura(String nombrePartitura) throws Exception {
 
 		Partitura part = this.getPartitura(nombrePartitura);
 
-		EmbajadorMusic21Python embajador =
-				new EmbajadorMusic21Python(context);
+		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
 
 		// IMPORTANTE:
 		// Aquí necesitamos el formato detallado.
 		// Digitador.java seguirá usando getNotas().
-		JSONObject jsonNotas =
-				embajador.getNotasDetalladas(
-						part.getPartitura_MusicXML().getRuta()
-				);
+		JSONObject jsonNotas = embajador.getNotasDetalladas(part.getPartitura_MusicXML().getRuta());
 
-		JSONArray arrayNotas =
-				jsonNotas.getJSONArray("notas");
+		JSONArray arrayNotas = jsonNotas.getJSONArray("notas");
 
-		List<DigitacionNota> listaDigitaciones =
-				new ArrayList<>();
+		List<DigitacionNota> listaDigitaciones = new ArrayList<>();
 
 		for (int i = 0; i < arrayNotas.length(); i++) {
 
-			JSONObject obj =
-					arrayNotas.getJSONObject(i);
+			JSONObject obj = arrayNotas.getJSONObject(i);
 
-			listaDigitaciones.add(
-					new DigitacionNota(
-							obj.optString("id", String.valueOf(i)),
-							obj.optString("nombre", "Nota"),
-							obj.optInt("compas", 1),
-							obj.optString("dedoIzquierdo", ""),
-							obj.optString("traste", ""),
-							obj.optString("cuerda", ""),
-							obj.optString("manoDerecha", "")
-					)
-			);
+			listaDigitaciones.add(new DigitacionNota(obj.optString("id", String.valueOf(i)),
+										obj.optString("nombre", "Nota"),
+										obj.optInt("compas", 1),
+										obj.optString("dedoIzquierdo", ""),
+										obj.optString("traste", ""),
+										obj.optString("cuerda", ""),
+										obj.optString("manoDerecha", "")));
 		}
 
 		return listaDigitaciones;

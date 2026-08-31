@@ -2,6 +2,7 @@ import json
 import re
 import xml.etree.ElementTree as ET
 import music21
+import os
 
 # ============================================================
 # MAPAS
@@ -465,6 +466,8 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
         remover_nombres_e_instrucciones_pantalla(ruta_xml)
 
         print(f"Partitura guardada correctamente: {ruta_xml}")
+
+        os.sync()
 
         return True
 

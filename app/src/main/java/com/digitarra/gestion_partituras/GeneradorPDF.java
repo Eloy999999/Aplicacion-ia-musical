@@ -21,6 +21,8 @@ public class GeneradorPDF {
 
     private final Context context;
 
+    private WebView webView;
+
     public GeneradorPDF(Context context) {
         this.context = context;
     }
@@ -46,7 +48,7 @@ public class GeneradorPDF {
                         .replace("\r", "");
 
                 // Configurar WebView
-                WebView webView = new WebView(context);
+                webView = new WebView(context);
                 WebSettings settings = webView.getSettings();
                 settings.setJavaScriptEnabled(true);
                 settings.setDomStorageEnabled(true);

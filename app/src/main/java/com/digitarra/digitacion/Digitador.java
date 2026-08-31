@@ -1858,16 +1858,16 @@ public class Digitador {
 				int[] configAcordeManoIzq = dedosFinal.getConfigManoIzq(i).getConfigAcorde();
 				int[] configAcordeManoDer = dedosFinal.getConfigManoDer(i).getConfigAcorde();
 				stringAcorde.append(String.format("%d,%d,%d,%c", configAcordeCT[0].getCuerda(), configAcordeCT[0].getTraste(),
-													configAcordeManoIzq[0], getDedoDerecho_char(configAcordeManoDer[0])));
+													configAcordeManoIzq[0] + 1, getDedoDerecho_char(configAcordeManoDer[0])));
 				for(int j = 1; j < configAcordeCT.length; j++) {
 					stringAcorde.append(String.format("+%d,%d,%d,%c", configAcordeCT[j].getCuerda(), configAcordeCT[j].getTraste(),
-							configAcordeManoIzq[j], getDedoDerecho_char(configAcordeManoDer[j])));
+							configAcordeManoIzq[j] + 1, getDedoDerecho_char(configAcordeManoDer[j])));
 				}
 				arrayDigitacion.put(stringAcorde.toString());
 			}
 			else {
 				arrayDigitacion.put(String.format("%d,%d,%d,%c", digitacionFinal[i].getConfigNota().getCuerda(), digitacionFinal[i].getConfigNota().getTraste(),
-						dedosFinal.getConfigManoIzq(i).getConfigNota(), getDedoDerecho_char(dedosFinal.getConfigManoDer(i).getConfigNota())));
+						dedosFinal.getConfigManoIzq(i).getConfigNota() + 1, getDedoDerecho_char(dedosFinal.getConfigManoDer(i).getConfigNota())));
 			}
 		}
 		
