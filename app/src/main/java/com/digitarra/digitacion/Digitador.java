@@ -411,10 +411,8 @@ public class Digitador {
 	/**
 	 * Funcion que genera la mejor digitacion posible para una partitura dada, usando programación dinámica. SOLO TIENE EN CUENTA NOTAS, 
 	 * no funciona para acordes.
-	 * 
-	 * Una vez la calcula, llama al embajador para que haga las anotaciones en el archivo MusicXML 
+	 * Una vez la calcula, llama al embajador para que haga las anotaciones en el archivo MusicXML
 	 * y devuelva la ruta del nuevo archivo MusicXML con la digitacion. Tras ello crea un nuevo objeto PartituraDigitada y lo devuelve.
-	 * 
 	 * @param partitura Partitura de guitarra que no ha sido digitada.
 	 * @return instancia de {@link PartituraDigitada} con la partitura digitada.
 	 */
@@ -578,7 +576,7 @@ public class Digitador {
 				}
 				else {
 					int deltaCuerda = posibleAcorde[i].getCuerda() - posibleAcorde[j].getCuerda();
-					int deltaTraste = posibleAcorde[j].getTraste() - posibleAcorde[j].getTraste();
+					int deltaTraste = posibleAcorde[i].getTraste() - posibleAcorde[j].getTraste();
 					costeAux = Math.sqrt(deltaCuerda*deltaCuerda + deltaTraste*deltaTraste);
 				}
 				maxDistancia = Math.max(maxDistancia, costeAux);
@@ -591,7 +589,7 @@ public class Digitador {
 
 	private int costeAcordeAcorde(PosGuitarra[] posibleAcordeAnt, PosGuitarra[] posibleAcordeSig) {
 		int maximoCoste = Integer.MIN_VALUE;
-		
+
 		for(int i = 0; i < posibleAcordeAnt.length; i++) {
 			for(int j = 0; j < posibleAcordeSig.length; j++) {
 				maximoCoste = Math.max(maximoCoste, coste(posibleAcordeAnt[i], posibleAcordeSig[j]));
@@ -1880,7 +1878,7 @@ public class Digitador {
 	
 	/**
 	 * Funcion que dado un identificador de dedo de la mano derecha de la PD, devuelve el caracter correspondiente para apuntarlo en la partitura.
-	 * @param dedo_der
+	 * @param dedo_der dedo derecho en formato int
 	 * @return caracter representativo del dedo dado
 	 */
 	private char getDedoDerecho_char(int dedo_der) {
