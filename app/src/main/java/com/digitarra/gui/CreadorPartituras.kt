@@ -26,8 +26,12 @@ class CreadorPartituras(private val context: Context) {
 
             val (xmlPath, midiPath) = when (extension) {
                 "xml", "musicxml" -> {
-                    val xmlGuardado = fileHelper.copiarArchivoAInterno(uri, "MusicXML_Files/$nombreOriginal")
-                    Pair(xmlGuardado.absolutePath, null)
+                    val embajador = EmbajadorMusic21Python(context)
+                    val xmlGuardado = fileHelper.copiarArchivoAInterno(uri, "temp/$nombreOriginal")
+                    val xmlConvertidoFile = File(context.filesDir, "MusicXML_Files/$nombreSinExtension.xml")
+                    embajador.convierteAMusicXML(xmlGuardado.toPath(), xmlConvertidoFile.toPath())
+                    while(!xmlConvertidoFile.exists() || xmlConvertidoFile.length() == 0L);
+                    Pair(xmlConvertidoFile.absolutePath, null)
                 }
                 "mid", "midi" -> {
                     val midiGuardado = fileHelper.copiarArchivoAInterno(uri, "temp/$nombreOriginal")

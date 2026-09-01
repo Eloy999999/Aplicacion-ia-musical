@@ -240,53 +240,67 @@ public class Digitador {
 															new PosGuitarra(6, 7), new PosGuitarra(4, 9),
 															new PosGuitarra(2, 12)};
 	
-	private static final PosGuitarra[] cuerda_traste_do5 = {new PosGuitarra(1, 8)};
+	private static final PosGuitarra[] cuerda_traste_do5 = {new PosGuitarra(1, 8), new PosGuitarra(2, 13), new PosGuitarra(3, 17)};
 	
-	private static final PosGuitarra[] cuerda_traste_do4 = {new PosGuitarra(2, 1), new PosGuitarra(3, 5), new PosGuitarra(4, 10)};
+	private static final PosGuitarra[] cuerda_traste_do4 = {new PosGuitarra(2, 1), new PosGuitarra(3, 5), new PosGuitarra(4, 10), new PosGuitarra(5, 15)};
 	
 	private static final PosGuitarra[] cuerda_traste_do3 = {new PosGuitarra(5, 3), new PosGuitarra(6, 8)};
 	
-	private static final PosGuitarra[] cuerda_traste_re5 = {new PosGuitarra(1, 10)};
+	private static final PosGuitarra[] cuerda_traste_re5 = {new PosGuitarra(1, 10), new PosGuitarra(2, 15), new PosGuitarra(3, 19)};
 	
-	private static final PosGuitarra[] cuerda_traste_re4 = {new PosGuitarra(2, 3), new PosGuitarra(3, 7), new PosGuitarra(4, 12)};
+	private static final PosGuitarra[] cuerda_traste_re4 = {new PosGuitarra(2, 3), new PosGuitarra(3, 7), new PosGuitarra(4, 12), new PosGuitarra(5, 17)};
 	
 	private static final PosGuitarra[] cuerda_traste_re3 = {new PosGuitarra(4, 0), new PosGuitarra(5, 5), new PosGuitarra(6, 10)};
 	
-	private static final PosGuitarra[] cuerda_traste_mi5 = {new PosGuitarra(1, 12)};
+	private static final PosGuitarra[] cuerda_traste_mi5 = {new PosGuitarra(1, 12), new PosGuitarra(2, 17)};
 	
-	private static final PosGuitarra[] cuerda_traste_mi4 = {new PosGuitarra(1, 0), new PosGuitarra(2, 5), new PosGuitarra(3, 9)};
+	private static final PosGuitarra[] cuerda_traste_mi4 = {new PosGuitarra(1, 0), new PosGuitarra(2, 5), new PosGuitarra(3, 9), new PosGuitarra(4, 14), new PosGuitarra(5, 19)};
 	
 	private static final PosGuitarra[] cuerda_traste_mi3 = {new PosGuitarra(4, 2), new PosGuitarra(5, 7), new PosGuitarra(6, 12)};
 	
 	private static final PosGuitarra[] cuerda_traste_mi2 = {new PosGuitarra(6, 0)};
-	
-	private static final PosGuitarra[] cuerda_traste_fa4 = {new PosGuitarra(1, 1), new PosGuitarra(2, 6), new PosGuitarra(3, 10)};
 
-	private static final PosGuitarra[] cuerda_traste_fa3 = {new PosGuitarra(4, 3), new PosGuitarra(5, 8)};
+	private static final PosGuitarra[] cuerda_traste_fa5 = {new PosGuitarra(1, 13), new PosGuitarra(2, 18)};
+	
+	private static final PosGuitarra[] cuerda_traste_fa4 = {new PosGuitarra(1, 1), new PosGuitarra(2, 6), new PosGuitarra(3, 10), new PosGuitarra(4, 15)};
+
+	private static final PosGuitarra[] cuerda_traste_fa3 = {new PosGuitarra(4, 3), new PosGuitarra(5, 8), new PosGuitarra(6, 13)};
 	
 	private static final PosGuitarra[] cuerda_traste_fa2 = {new PosGuitarra(6, 1)};
-	
-	private static final PosGuitarra[] cuerda_traste_sol4 = {new PosGuitarra(1, 3), new PosGuitarra(2, 8), new PosGuitarra(3, 12)};
 
-	private static final PosGuitarra[] cuerda_traste_sol3 = {new PosGuitarra(3, 0), new PosGuitarra(4, 5), new PosGuitarra(5, 10)};
+	private static final PosGuitarra[] cuerda_traste_sol5 = {new PosGuitarra(1, 15)};
+	
+	private static final PosGuitarra[] cuerda_traste_sol4 = {new PosGuitarra(1, 3), new PosGuitarra(2, 8), new PosGuitarra(3, 12), new PosGuitarra(4, 17)};
+
+	private static final PosGuitarra[] cuerda_traste_sol3 = {new PosGuitarra(3, 0), new PosGuitarra(4, 5), new PosGuitarra(5, 10), new PosGuitarra(6, 15)};
 	
 	private static final PosGuitarra[] cuerda_traste_sol2 = {new PosGuitarra(6, 3)};
+
+	private static final PosGuitarra[] cuerda_traste_la5 = {new PosGuitarra(1, 17)};
+
+	private static final PosGuitarra[] cuerda_traste_la4 = {new PosGuitarra(1, 5), new PosGuitarra(2, 10), new PosGuitarra(3, 14), new PosGuitarra(4, 19)};
 	
-	private static final PosGuitarra[] cuerda_traste_la4 = {new PosGuitarra(1, 5), new PosGuitarra(2, 10)};
-	
-	private static final PosGuitarra[] cuerda_traste_la3 = {new PosGuitarra(3, 2), new PosGuitarra(4, 7), new PosGuitarra(5, 12)};
+	private static final PosGuitarra[] cuerda_traste_la3 = {new PosGuitarra(3, 2), new PosGuitarra(4, 7), new PosGuitarra(5, 12), new PosGuitarra(6, 17)};
 	
 	private static final PosGuitarra[] cuerda_traste_la2 = {new PosGuitarra(5, 0), new PosGuitarra(6, 5)};
+
+	private static final PosGuitarra[] cuerda_traste_si5 = {new PosGuitarra(1, 19)};
 	
-	private static final PosGuitarra[] cuerda_traste_si4 = {new PosGuitarra(1, 7), new PosGuitarra(2, 12)};
+	private static final PosGuitarra[] cuerda_traste_si4 = {new PosGuitarra(1, 7), new PosGuitarra(2, 12), new PosGuitarra(3, 16)};
 	
-	private static final PosGuitarra[] cuerda_traste_si3 = {new PosGuitarra(2, 0), new PosGuitarra(3, 4), new PosGuitarra(4, 9)};
+	private static final PosGuitarra[] cuerda_traste_si3 = {new PosGuitarra(2, 0), new PosGuitarra(3, 4), new PosGuitarra(4, 9), new PosGuitarra(5, 14), new PosGuitarra(6, 19)};
 	
 	private static final PosGuitarra[] cuerda_traste_si2 = {new PosGuitarra(5, 2), new PosGuitarra(6, 7)};
 	
-	private static final int NUM_TRASTES = 13; //Número de trastes a considerar en la programación dinámica. 
+	private static final int NUM_TRASTES = 20; //Número de trastes a considerar en la programación dinámica.
 	
 	private static final int NUM_CUERDAS = 7; //Número de cuerdas a considerar en la programación dinámica.
+
+	private static final double PENALIZACION_POS_ACORDE_IMPOSIBLE = 10000000;
+
+	private static final int INICIO_FRANJA_EXTRA = 13; //Traste en el que se junta el mastil con el cuerpo de la guitarra
+
+	private static final double COSTE_FRANJA_EXTRA = 4.0; //Coste de la franja extra, es mas grande porque no se suele usar.
 
 	private static final int INICIO_FRANJA_ESTRECHA = 8; //Traste a partir del cual el espacio entre trastes es mas estrecho
 
@@ -295,6 +309,8 @@ public class Digitador {
 	private static final int INICIO_FRANJA_MEDIA = 5; //Traste a partir del cual el espacio entre trastes es medio, ni muy estrecho ni muy ancho
 
 	private static final double COSTE_FRANJA_MEDIA = 2.0; //Espacio(en cm) entre trastes en la franja media
+
+	private static final int INF_INT = 1000000;
 
 	private static final double COSTE_FRANJA_ANCHA = 3.0; //Espacio(en cm) entre trastes en la franja ancha
 	
@@ -348,7 +364,7 @@ public class Digitador {
 
 	private static final char CARACTER_DEDO_DESCONOCIDO = '?'; //Carácter para cuando no se reconoce el dedo de la digitacion.
 
-	private static final int MAX_CONFIGURACIONES = 81;
+	private static final int MAX_CONFIGURACIONES = 500;
 
 	private static final int MAX_CONFIGURACIONES_MANO_IZQUIERDA = 11; //4!/(4-4)!
 	
@@ -469,7 +485,7 @@ public class Digitador {
 		//Inicializamos la matriz a INF
 		for(int i = 0; i < n; i++) {
 			for(int j = 0; j < MAX_CONFIGURACIONES; j++) {
-				matrizCoste[i][j] = Integer.MAX_VALUE;
+				matrizCoste[i][j] = INF_INT;
 			}
 		}
 		
@@ -484,22 +500,21 @@ public class Digitador {
 			PosiblesConfiguraciones posibles_elemento_ant = configs[i-1];
 			for(int j_ant = 0; j_ant < posibles_elemento_ant.getNumConfigs(); j_ant++) {
 				for(int j_act = 0; j_act < posibles_elemento_act.getNumConfigs(); j_act++) {
-					int costeAux = matrizCoste[i+1][j_act];
-					if(esAcorde[i-1] && esAcorde[i]) { //Ambos son acordes
-						costeAux += costeAcordeAcorde(posibles_elemento_ant.getPosibleAcorde(j_ant), posibles_elemento_act.getPosibleAcorde(j_act))
-										+ costeAcordeIndividual(posibles_elemento_act.getPosibleAcorde(j_act));
+					if(!esAcorde[i] || !posicionAcordeInvalida(posibles_elemento_act.getPosibleAcorde(j_act))) {
+						int costeAux = matrizCoste[i + 1][j_act];
+						if (esAcorde[i - 1] && esAcorde[i]) { //Ambos son acordes
+							costeAux += costeAcordeAcorde(posibles_elemento_ant.getPosibleAcorde(j_ant), posibles_elemento_act.getPosibleAcorde(j_act))
+									+ costeAcordeIndividual(posibles_elemento_act.getPosibleAcorde(j_act));
+						} else if (esAcorde[i - 1] && !esAcorde[i]) { //Anterior es acorde y actual es nota
+							costeAux += costeAcordeNota(posibles_elemento_ant.getPosibleAcorde(j_ant), posibles_elemento_act.getPosibleNota(j_act));
+						} else if (!esAcorde[i - 1] && esAcorde[i]) { //Anterior es nota y actual es acorde
+							costeAux += costeNotaAcorde(posibles_elemento_ant.getPosibleNota(j_ant), posibles_elemento_act.getPosibleAcorde(j_act))
+									+ costeAcordeIndividual(posibles_elemento_act.getPosibleAcorde(j_act));
+						} else { //Ambos son notas
+							costeAux += coste(posibles_elemento_ant.getPosibleNota(j_ant), posibles_elemento_act.getPosibleNota(j_act));
+						}
+						matrizCoste[i][j_ant] = Math.min(costeAux, matrizCoste[i][j_ant]);
 					}
-					else if(esAcorde[i-1] && !esAcorde[i]) { //Anterior es acorde y actual es nota
-						costeAux += costeAcordeNota(posibles_elemento_ant.getPosibleAcorde(j_ant), posibles_elemento_act.getPosibleNota(j_act));
-					}
-					else if(!esAcorde[i-1] && esAcorde[i]) { //Anterior es nota y actual es acorde
-						costeAux += costeNotaAcorde(posibles_elemento_ant.getPosibleNota(j_ant), posibles_elemento_act.getPosibleAcorde(j_act))
-										+ costeAcordeIndividual(posibles_elemento_act.getPosibleAcorde(j_act));
-					}
-					else { //Ambos son notas
-						costeAux += coste(posibles_elemento_ant.getPosibleNota(j_ant), posibles_elemento_act.getPosibleNota(j_act));
-					}
-					matrizCoste[i][j_ant] = Math.min(costeAux, matrizCoste[i][j_ant]);
 				}
 			}
 		}
@@ -512,13 +527,15 @@ public class Digitador {
 		for(int i = 0; i < n - 1; i++) {
 			
 			PosiblesConfiguraciones posibles_nota_i = configs[i];
-			int mejorCoste = Integer.MAX_VALUE;
+			int mejorCoste = INF_INT;
 			int indexMejor = -1;
 			
 			for(int j = 0; j < posibles_nota_i.getNumConfigs(); j++) {
-				if(matrizCoste[i+1][j] < mejorCoste) {
-					mejorCoste = matrizCoste[i+1][j];
-					indexMejor = j;
+				if(!esAcorde[i] || !posicionAcordeInvalida(posibles_nota_i.getPosibleAcorde(j))) {
+					if(matrizCoste[i + 1][j] < mejorCoste) {
+						mejorCoste = matrizCoste[i + 1][j];
+						indexMejor = j;
+					}
 				}
 			}
 			if(esAcorde[i]) {
@@ -534,30 +551,28 @@ public class Digitador {
 		PosiblesConfiguraciones posibles_ultima = configs[n-1];
 		double mejorAux = Double.MAX_VALUE;
 		for(int j = 0; j < posibles_ultima.getNumConfigs(); j++) {
-			
-			double aux = 0;
-			Configuracion posos = null;
-			if(esAcorde[n-2] && esAcorde[n-1]) { //Ambos son acordes
-				aux = costeAcordeAcorde(mejorDigitacion[n-2].getConfigAcorde(), posibles_ultima.getPosibleAcorde(j)) 
-						+ costeAcordeIndividual(posibles_ultima.getPosibleAcorde(j));
-				posos = new Configuracion(posibles_ultima.getPosibleAcorde(j));
-			}
-			else if(esAcorde[n-2] && !esAcorde[n-1]) { //Anterior es acorde y actual es nota
-				aux = costeAcordeNota(mejorDigitacion[n-2].getConfigAcorde(), posibles_ultima.getPosibleNota(j));
-				posos = new Configuracion(posibles_ultima.getPosibleNota(j));
-			}
-			else if(!esAcorde[n-2] && esAcorde[n-1]) { //Anterior es nota y actual es acorde
-				aux = costeNotaAcorde(mejorDigitacion[n-2].getConfigNota(), posibles_ultima.getPosibleAcorde(j))
-						+ costeAcordeIndividual(posibles_ultima.getPosibleAcorde(j));
-				posos = new Configuracion(posibles_ultima.getPosibleAcorde(j));
-			}
-			else { //Ambos son notas
-				aux = coste(mejorDigitacion[n-2].getConfigNota(), posibles_ultima.getPosibleNota(j));
-				posos = new Configuracion(posibles_ultima.getPosibleNota(j));
-			}
-			if(aux < mejorAux) {
-				mejorAux = aux;
-				mejorDigitacion[n-1] = posos;
+			if(!esAcorde[n-1] || !posicionAcordeInvalida(posibles_ultima.getPosibleAcorde(j))) {
+				double aux = 0;
+				Configuracion posos = null;
+				if (esAcorde[n - 2] && esAcorde[n - 1]) { //Ambos son acordes
+					aux = costeAcordeAcorde(mejorDigitacion[n - 2].getConfigAcorde(), posibles_ultima.getPosibleAcorde(j))
+							+ costeAcordeIndividual(posibles_ultima.getPosibleAcorde(j));
+					posos = new Configuracion(posibles_ultima.getPosibleAcorde(j));
+				} else if (esAcorde[n - 2] && !esAcorde[n - 1]) { //Anterior es acorde y actual es nota
+					aux = costeAcordeNota(mejorDigitacion[n - 2].getConfigAcorde(), posibles_ultima.getPosibleNota(j));
+					posos = new Configuracion(posibles_ultima.getPosibleNota(j));
+				} else if (!esAcorde[n - 2] && esAcorde[n - 1]) { //Anterior es nota y actual es acorde
+					aux = costeNotaAcorde(mejorDigitacion[n - 2].getConfigNota(), posibles_ultima.getPosibleAcorde(j))
+							+ costeAcordeIndividual(posibles_ultima.getPosibleAcorde(j));
+					posos = new Configuracion(posibles_ultima.getPosibleAcorde(j));
+				} else { //Ambos son notas
+					aux = coste(mejorDigitacion[n - 2].getConfigNota(), posibles_ultima.getPosibleNota(j));
+					posos = new Configuracion(posibles_ultima.getPosibleNota(j));
+				}
+				if (aux < mejorAux) {
+					mejorAux = aux;
+					mejorDigitacion[n - 1] = posos;
+				}
 			}
 		}
 		
@@ -582,9 +597,30 @@ public class Digitador {
 				maxDistancia = Math.max(maxDistancia, costeAux);
 			}
 		}
+
+
+
 		return maxDistancia;
 	}
 
+	private boolean posicionAcordeInvalida(PosGuitarra[] posibleAcorde) {
+		int tamAcorde = posibleAcorde.length;
+		for(int i = 0; i < tamAcorde; i++) {
+			for (int j = i+1; j < tamAcorde; j++) {
+				if (posibleAcorde[i].getCuerda() == posibleAcorde[j].getCuerda()) {
+
+					boolean unaAlAire = (posibleAcorde[i].getTraste() == 0 || posibleAcorde[j].getTraste() == 0);
+					boolean unaPisada = (posibleAcorde[i].getTraste() != 0 || posibleAcorde[j].getTraste() != 0);
+
+					// Si en la misma cuerda coincide una al aire Y una pisada -> ES INVÁLIDO (true)
+					if (unaAlAire && unaPisada) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 
 	private int costeAcordeAcorde(PosGuitarra[] posibleAcordeAnt, PosGuitarra[] posibleAcordeSig) {
@@ -829,7 +865,7 @@ public class Digitador {
 		//Rellenamos la matriz con valor INFinito menos la n ya que eso es 0 por defecto
 		for(int i = 0; i < n; i++) {
 			for(int j = 0; j < MAX_CONFIGURACIONES_MANO_DERECHA; j++) {
-				matrizManoDerecha[i][j] = Integer.MAX_VALUE;
+				matrizManoDerecha[i][j] = INF_INT;
 			}
 		}
 		
@@ -887,7 +923,7 @@ public class Digitador {
 		ConfiguracionMano[] configManoDer = new ConfiguracionMano[n];
 		for(int i = 0; i < n-1; i++) {
 			j_mejor = 0;
-			mejorCoste = Integer.MAX_VALUE;
+			mejorCoste = INF_INT;
 			for(int j = 0; j < configsDer[i].getNumConfigs(); j++) {
 				if(matrizManoDerecha[i+1][j] < mejorCoste) {
 					j_mejor = j;
@@ -904,7 +940,7 @@ public class Digitador {
 		
 		
 		j_mejor = 0;
-		mejorCoste = Integer.MAX_VALUE;
+		mejorCoste = INF_INT;
 		posibles_ultima = configsDer[n-1];
 		mejor_penult = configManoDer[n-2];
 		for(int j_act = 0; j_act < posibles_ultima.getNumConfigs(); j_act++) {
@@ -1266,7 +1302,7 @@ public class Digitador {
 		for(int i = 0; i < n; i++) {
 			for(int j = 0; j < NUM_CUERDAS; j++) {
 				for(int k = 0; k < NUM_TRASTES; k++) {
-					matrizCoste[i][j][k] = Integer.MAX_VALUE;
+					matrizCoste[i][j][k] = INF_INT;
 				}
 			}
 		}
@@ -1303,7 +1339,7 @@ public class Digitador {
 		
 		for(int i = 0; i < arrayNotas.length() - 1; i++) {
 			PosGuitarra[] posibles_nota_i = posiblesDigitaciones(arrayNotas.getString(i));
-			int mejorCoste = Integer.MAX_VALUE;
+			int mejorCoste = INF_INT;
 			PosGuitarra mejorDig_i = null;
 			
 			for(int j = 0; j < posibles_nota_i.length; j++) {
@@ -1318,7 +1354,7 @@ public class Digitador {
 		}
 		
 		PosGuitarra[] posibles_ultima = posiblesDigitaciones(arrayNotas.getString(n-1));
-		int mejorAux = Integer.MAX_VALUE;
+		int mejorAux = INF_INT;
 		for(int i = 0; i < posibles_ultima.length; i++) {
 			
 			int aux = coste(mejorDigitacion[n-2], posibles_ultima[i]);
@@ -1450,6 +1486,9 @@ public class Digitador {
 		case "mi2":
 			resul = cuerda_traste_mi2;
 			break;
+		case "fa5":
+			resul = cuerda_traste_fa5;
+			break;
 		case "fa4":
 			resul = cuerda_traste_fa4;
 			break;
@@ -1458,6 +1497,9 @@ public class Digitador {
 			break;
 		case "fa2":
 			resul = cuerda_traste_fa2;
+			break;
+		case "sol5":
+			resul = cuerda_traste_sol5;
 			break;
 		case "sol4":
 			resul = cuerda_traste_sol4;
@@ -1468,6 +1510,9 @@ public class Digitador {
 		case "sol2":
 			resul = cuerda_traste_sol2;
 			break;
+		case "la5":
+			resul = cuerda_traste_la5;
+			break;
 		case "la4":
 			resul = cuerda_traste_la4;
 			break;
@@ -1476,6 +1521,9 @@ public class Digitador {
 			break;
 		case "la2":
 			resul = cuerda_traste_la2;
+			break;
+		case "si5":
+			resul = cuerda_traste_si5;
 			break;
 		case "si4":
 			resul = cuerda_traste_si4;
@@ -1585,7 +1633,7 @@ public class Digitador {
 		
 		for(int i = 0; i < n; i++) {
 			for(int j = 0; j < 5; j++) {
-				costeManoDerecha[i][j] = Integer.MAX_VALUE;
+				costeManoDerecha[i][j] = INF_INT;
 			}
 		}
 
@@ -1605,7 +1653,7 @@ public class Digitador {
 		//Recolectamos mejor camino mano derecha
 		int[] mejorCaminoDer = new int[n];
 		for(int i = 0; i < n - 1; i++) {
-			int mejorAct = Integer.MAX_VALUE;
+			int mejorAct = INF_INT;
 			for(int d = 0; d < 5; d++) {
 				if(costeManoDerecha[i+1][d] < mejorAct) {
 					mejorAct = costeManoDerecha[i+1][d];
@@ -1614,7 +1662,7 @@ public class Digitador {
 			}
 		}
 		
-		int mejorAct = Integer.MAX_VALUE;
+		int mejorAct = INF_INT;
 		for(int d = 0; d < 5; d++) {
 			int aux = costeDesplManoDer(mejorCaminoDer[n-2], d, cuerda_traste_mejor[n-2], cuerda_traste_mejor[n-1]);
 			if(aux < mejorAct) {
@@ -1735,7 +1783,10 @@ public class Digitador {
 			int maxi = Math.max(t_act, t_sig);
 			int mini = Math.min(t_act, t_sig);
 			while(maxi != mini) {
-				if(maxi >= INICIO_FRANJA_ESTRECHA) {
+				if(maxi >= INICIO_FRANJA_EXTRA) {
+					coste += COSTE_FRANJA_EXTRA;
+				}
+				else if(maxi >= INICIO_FRANJA_ESTRECHA) {
 					coste += COSTE_FRANJA_ESTRECHA;
 				}
 				else if(maxi >= INICIO_FRANJA_MEDIA) {
