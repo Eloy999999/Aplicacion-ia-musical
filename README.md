@@ -10,8 +10,6 @@ El proyecto se ha enfocado sobre todo en la especificación y el diseño de la a
 
 1. Instalar Android Studio. Disponible en: https://developer.android.com/studio?hl=es-419
 
-Ahora procedemos con los pasos para clonar el repositorio y la instalación de las dependencias.
-
 2. Si se necesita emular la ejecución de la aplicación desde el ordenador, descargar el emulador de móviles de Android Studio durante la instalación, con muchos modelos disponibles para emular. O, se puede descargar desde Tools -> Device Manager -> Add a new device (el “+” que hay en el panel derecho) -> Create virtual device.
 
 3. El Android SDK (Kit de desarrollo software de Android), que, aunque se configure  de forma automática durante la instalación de Android Studio, se debe comprobar que se tiene Android SDK Platform 37, que se hace desde el proyecto al seleccionar Tools -> SDK Manager.
@@ -62,4 +60,4 @@ Ahora procedemos con los pasos para clonar el repositorio y la instalación de l
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la [Licencia GPU](LICENSE).
+Este proyecto está licenciado bajo los términos de la [Licencia GPL](LICENSE).
