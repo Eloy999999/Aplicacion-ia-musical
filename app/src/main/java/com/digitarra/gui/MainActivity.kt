@@ -32,6 +32,7 @@ import com.digitarra.gestion_partituras.BibliotecaPartituras
 import com.digitarra.gestion_partituras.Coleccion
 import com.digitarra.gestion_partituras.DigitacionNota
 import com.digitarra.gestion_partituras.GeneradorPDF
+import com.digitarra.gestion_partituras.NombreColeccionEnUsoException
 import com.digitarra.gestion_partituras.Partitura
 import kotlinx.coroutines.launch
 
@@ -143,7 +144,7 @@ class MainActivity : ComponentActivity() {
                                             pantallaActual = 1
                                         }
                                         catch (e: Exception) {
-                                            e.printStackTrace()
+                                            //e.printStackTrace()
                                             Toast.makeText(
                                                 context,
                                                 "Error al cargar la biblioteca: ${e.message}",
@@ -161,9 +162,19 @@ class MainActivity : ComponentActivity() {
                                         onSeleccionarColeccion = { coleccion -> coleccionActiva = coleccion },
                                         onAgregarClick = { pantallaActual = 2 },
                                         onCrearColeccion = { nombre ->
-                                            biblioteca?.creaColeccion(emptyList<String>(), nombre)
-//                                            biblioteca?.guardarCambiosEnJson(context)
-                                            refrescoKey++
+                                            try {
+                                                biblioteca?.creaColeccion(
+                                                    emptyList<String>(),
+                                                    nombre
+                                                )
+                                                refrescoKey++
+                                            } catch (e: NombreColeccionEnUsoException) {
+                                                Toast.makeText(
+                                                    context,
+                                                    "La coleccion \"${e.nombreColeccion}\" ya existe",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }
                                         },
                                         onAgregarPartiturasAColeccion = { seleccionadas ->
                                             coleccionActiva?.let { col ->
