@@ -1,6 +1,5 @@
 package com.digitarra.gestion_partituras;
 
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,10 +21,9 @@ public class Coleccion {
 		return nombreColeccion;
 	}
 	
-	public void añadePartitura(String nombre, Partitura part) {
+	public void añadePartitura(String nombre, Partitura part) throws NombrePartituraEnUsoException {
 		if(partituras.containsKey(nombre)) {
-			//TODO: lanzar excepcion porque ya estaba añadir
-
+			throw new NombrePartituraEnUsoException(nombre);
 		}
 		else {
 			partituras.put(nombre, part);
@@ -36,9 +34,9 @@ public class Coleccion {
 		return new ArrayList<>(partituras.keySet());
 	}
 	
-	public void quitarPartitura(String nombre) {
+	public void quitarPartitura(String nombre) throws PartituraNoExisteException {
 		if(!partituras.containsKey(nombre)) {
-			//TODO: lanzar excepcion de no existia
+			throw new PartituraNoExisteException(nombre);
 		}
 		else {
 			partituras.remove(nombre);
@@ -49,9 +47,9 @@ public class Coleccion {
 		return partituras.containsKey(nombre);
 	}
 	
-	public Partitura getPartitura(String nombre) {
+	public Partitura getPartitura(String nombre) throws PartituraNoExisteException {
 		if(!partituras.containsKey(nombre)) {
-			//TODO: lanzar excepcion porque ya estaba añadida
+			throw new PartituraNoExisteException(nombre);
 		}
 		return partituras.get(nombre);
 	}
@@ -60,13 +58,13 @@ public class Coleccion {
 		return new ArrayList<Partitura>(partituras.values());
 	}
 
-	public void añadePartituras(List<Partitura> partituras) {
+	public void añadePartituras(List<Partitura> partituras) throws NombrePartituraEnUsoException {
 		for(Partitura p : partituras) {
 			this.añadePartitura(p.getNombre_partitura(), p);
 		}
 	}
 
-	public void quitarPartituras(List<Partitura> partituras) {
+	public void quitarPartituras(List<Partitura> partituras) throws PartituraNoExisteException {
 		for(Partitura p : partituras) {
 			this.quitarPartitura(p.getNombre_partitura());
 		}
