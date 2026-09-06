@@ -5,6 +5,7 @@ import android.net.Uri
 import com.digitarra.gestion_partituras.BibliotecaPartituras
 import com.digitarra.gestion_partituras.EmbajadorMusic21Python
 import com.digitarra.gestion_partituras.GeneradorPDF
+import com.digitarra.gestion_partituras.NombrePartituraEnUsoException
 import com.digitarra.gestion_partituras.Partitura
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,25 +18,33 @@ class CreadorPartituras(private val context: Context) {
 
     suspend fun procesarYGuardarPartitura(
         uri: Uri,
-        biblioteca: BibliotecaPartituras?
+        biblioteca: BibliotecaPartituras?,
+        nombre: String
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
+
+            if(biblioteca?.nombrePartituraExiste(nombre) == true) {
+                return@withContext Result.failure<Unit>(NombrePartituraEnUsoException(nombre))
+            }
+
             val nombreOriginal = fileHelper.obtenerNombreArchivo(uri)
             val extension = nombreOriginal.substringAfterLast(".").lowercase()
             val nombreSinExtension = nombreOriginal.substringBeforeLast(".")
+
+            val nombreSinEspacios = nombre.replace(" ", "")
 
             val (xmlPath, midiPath) = when (extension) {
                 "xml", "musicxml" -> {
                     val embajador = EmbajadorMusic21Python(context)
                     val xmlGuardado = fileHelper.copiarArchivoAInterno(uri, "temp/$nombreOriginal")
-                    val xmlConvertidoFile = File(context.filesDir, "MusicXML_Files/$nombreSinExtension.xml")
+                    val xmlConvertidoFile = File(context.filesDir, "MusicXML_Files/$nombreSinEspacios.xml")
                     embajador.convierteAMusicXML(xmlGuardado.toPath(), xmlConvertidoFile.toPath())
                     while(!xmlConvertidoFile.exists() || xmlConvertidoFile.length() == 0L);
                     Pair(xmlConvertidoFile.absolutePath, null)
                 }
                 "mid", "midi" -> {
                     val midiGuardado = fileHelper.copiarArchivoAInterno(uri, "temp/$nombreOriginal")
-                    val xmlConvertidoFile = File(context.filesDir, "MusicXML_Files/$nombreSinExtension.xml")
+                    val xmlConvertidoFile = File(context.filesDir, "MusicXML_Files/$nombreSinEspacios.xml")
                     if (!xmlConvertidoFile.exists()) {
 //                        xmlConvertidoFile.writeText("<!-- XML generado desde $nombreOriginal -->")
                         val emabaj = EmbajadorMusic21Python(context)
@@ -48,7 +57,7 @@ class CreadorPartituras(private val context: Context) {
             }
 
             // Generar PDF
-            val pdfFile = File(context.filesDir, "PDFs/$nombreSinExtension.pdf")
+            val pdfFile = File(context.filesDir, "PDFs/$nombreSinEspacios.pdf")
             val generador = GeneradorPDF(context)
 
             val rutaPdfGenerada = generador.obtenerPDF(xmlPath, pdfFile.absolutePath)
@@ -60,7 +69,7 @@ class CreadorPartituras(private val context: Context) {
 //            } else {
 //                Partitura(nombreSinExtension, rutaPDF, xmlPath, false)
 //            }
-            val nuevaPartitura = Partitura(nombreSinExtension, Paths.get(rutaPDF), Paths.get(xmlPath), false)
+            val nuevaPartitura = Partitura(nombre, Paths.get(rutaPDF), Paths.get(xmlPath), false)
 
             biblioteca?.insertaPartitura(nuevaPartitura)
 

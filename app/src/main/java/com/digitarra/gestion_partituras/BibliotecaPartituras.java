@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,7 +105,6 @@ public class BibliotecaPartituras {
 
 
 	}
-
 
 
 	private Partitura parseaPartitura(JSONObject part_i_info) throws JSONException {
@@ -510,4 +510,7 @@ public class BibliotecaPartituras {
 		return listaDigitaciones;
 	}
 
+	public boolean nombrePartituraExiste(String nombre) {
+		return partituras.containsKey(nombre);
+	}
 }

@@ -1,5 +1,6 @@
 package com.digitarra.gui
 
+import android.content.Context
 import android.net.Uri
 import com.digitarra.app_tfg.R
 import android.os.Bundle
@@ -22,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +33,6 @@ import androidx.lifecycle.lifecycleScope
 import com.digitarra.gestion_partituras.BibliotecaPartituras
 import com.digitarra.gestion_partituras.Coleccion
 import com.digitarra.gestion_partituras.DigitacionNota
-import com.digitarra.gestion_partituras.GeneradorPDF
 import com.digitarra.gestion_partituras.NombreColeccionEnUsoException
 import com.digitarra.gestion_partituras.Partitura
 import kotlinx.coroutines.launch
@@ -42,6 +43,8 @@ import kotlinx.coroutines.withContext
 class MainActivity : ComponentActivity() {
 
     private var bibliotecaInstancia: BibliotecaPartituras? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val context = this
@@ -59,6 +62,8 @@ class MainActivity : ComponentActivity() {
                 // Variable de estado para forzar el redibujado de Compose al modificar la biblioteca
                 var refrescoKey by remember { mutableIntStateOf(0) }
 
+                var uriSeleccionada by remember {mutableStateOf<Uri?>(null)}
+
                 //val context = LocalContext.current
 
                 LaunchedEffect(biblioteca) {
@@ -69,56 +74,60 @@ class MainActivity : ComponentActivity() {
                 val filePickerLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.OpenDocument()
                 ) { uri: Uri? ->
-                    uri?.let {
-                        try {
-                            //val nombreOriginal = obtenerNombreArchivo(it)
-                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
-
-                            Toast.makeText(
-                                context,
-                                "Generando PDF, por favor espera...",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            val creadorPartituras = CreadorPartituras(this)
-
-                            lifecycleScope.launch {
-                                // Le pasas la URI directamente sin importar si es XML o MIDI
-                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca)
-
-
-
-                                resultado.fold(
-                                    onSuccess = {
-                                        val temp = biblioteca
-                                        biblioteca = null
-                                        biblioteca = temp
-                                        refrescoKey++
-                                        pantallaActual = 1
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Partitura añadida con éxito",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    onFailure = { error ->
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Error: ${error.message}",
-                                            Toast.LENGTH_LONG
-                                        ).show()
-                                    }
-                                )
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            Toast.makeText(
-                                context,
-                                "Error al procesar el archivo: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    }
+                    uriSeleccionada = uri
+//                    uri?.let {
+//                        try {
+//                            //val nombreOriginal = obtenerNombreArchivo(it)
+//                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
+//
+//
+//
+//                            Toast.makeText(
+//                                context,
+//                                "Generando PDF, por favor espera...",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//
+//                            val creadorPartituras = CreadorPartituras(this)
+//
+//                            lifecycleScope.launch {
+//
+//                                // Le pasas la URI directamente sin importar si es XML o MIDI
+//                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca)
+//
+//
+//
+//                                resultado.fold(
+//                                    onSuccess = {
+//                                        val temp = biblioteca
+//                                        biblioteca = null
+//                                        biblioteca = temp
+//                                        refrescoKey++
+//                                        pantallaActual = 1
+//                                        Toast.makeText(
+//                                            this@MainActivity,
+//                                            "Partitura añadida con éxito",
+//                                            Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    },
+//                                    onFailure = { error ->
+//                                        Toast.makeText(
+//                                            this@MainActivity,
+//                                            "Error: ${error.message}",
+//                                            Toast.LENGTH_LONG
+//                                        ).show()
+//                                    }
+//                                )
+//                            }
+//                        } catch (e: Exception) {
+//                            e.printStackTrace()
+//                            Toast.makeText(
+//                                context,
+//                                "Error al procesar el archivo: ${e.message}",
+//                                Toast.LENGTH_LONG
+//                            ).show()
+//                        }
+//                    }
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -315,17 +324,67 @@ class MainActivity : ComponentActivity() {
                             2 -> PantallaOpcionesAgregar(
                                 onVolverClick = { pantallaActual = 1 },
                                 onOpcion1Click = { /* Añadir por audio */ },
-                                onOpcion2Click = {
-                                    // Tipos MIME filtrados para archivos XML y MIDI
-                                    val mimeTypes = arrayOf(
-                                        "text/xml",
-                                        "application/xml",
-                                        "text/mxl",
-                                        "application/mxl",
-                                        "audio/midi",
-                                        "audio/x-midi"
-                                    )
-                                    filePickerLauncher.launch(mimeTypes)
+                                onOpcion2Click = { nombre: String, uri: Uri?, context: Context ->
+//                                    // Tipos MIME filtrados para archivos XML y MIDI
+//                                    val mimeTypes = arrayOf(
+//                                        "text/xml",
+//                                        "application/xml",
+//                                        "audio/midi",
+//                                        "audio/x-midi"
+//                                    )
+//
+//                                    filePickerLauncher.launch(mimeTypes)
+                                    uri?.let { uri ->
+                                        try {
+                                            //val nombreOriginal = obtenerNombreArchivo(it)
+                                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
+                                            Toast.makeText(
+                                                context,
+                                                "Creando partitura, por favor espera...",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+
+                                            val creadorPartituras = CreadorPartituras(context)
+
+                                            lifecycleScope.launch {
+
+                                                // Le pasas la URI directamente sin importar si es XML o MIDI
+                                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca, nombre)
+
+
+
+                                                resultado.fold(
+                                                    onSuccess = {
+                                                        val temp = biblioteca
+                                                        biblioteca = null
+                                                        biblioteca = temp
+                                                        refrescoKey++
+                                                        pantallaActual = 1
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            "Partitura añadida con éxito",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    },
+                                                    onFailure = { error ->
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            "Error: ${error.message}",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
+                                                )
+                                            }
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                            Toast.makeText(
+                                                context,
+                                                "Error al procesar el archivo: ${e.message}",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
+                                    }
+
                                 }
                             )
                             3 -> {
@@ -359,7 +418,6 @@ class MainActivity : ComponentActivity() {
                                                         pantallaActual = 1
                                                     }
                                                 } catch (e: Exception) {
-                                                    e.printStackTrace()
                                                     withContext(Dispatchers.Main) {
                                                         Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                                                     }
@@ -473,6 +531,9 @@ fun PantallaBiblioteca(
             }
         )
     }
+
+
+
 
     if (mostrarDialogoAgregarPartituras && biblioteca != null) {
         DialogoAgregarPartiturasAColeccion(
@@ -864,8 +925,33 @@ fun ItemPartitura(
 fun PantallaOpcionesAgregar(
     onVolverClick: () -> Unit,
     onOpcion1Click: () -> Unit,
-    onOpcion2Click: () -> Unit
+    onOpcion2Click: (String, Uri?, Context) -> Unit
 ) {
+    var uriTemporal by remember { mutableStateOf<Uri?>(null) }
+    var nombreInput by remember { mutableStateOf("") }
+    var mostrarDialogo by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    if(mostrarDialogo) {
+        DialogoNuevaPartitura(
+            onDismiss = { mostrarDialogo = false },
+            onConfirmar = { nombre ->
+                nombreInput = nombre
+                mostrarDialogo = false
+                onOpcion2Click(nombre, uriTemporal, context)
+            }
+        )
+    }
+
+    // Launcher de archivos
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        uri?.let {
+            uriTemporal = it
+            mostrarDialogo = true // Muestra el diálogo al elegir archivo
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -935,7 +1021,16 @@ fun PantallaOpcionesAgregar(
                 }
 
                 Button(
-                    onClick = onOpcion2Click,
+                    //onClick = onOpcion2Click,
+                    onClick = {
+                        val mimeTypes = arrayOf(
+                            "text/xml",
+                            "application/xml",
+                            "audio/midi",
+                            "audio/x-midi"
+                        )
+                        filePickerLauncher.launch(mimeTypes)
+                    },
                     modifier = Modifier
                         .weight(1f)
                         .height(80.dp)
@@ -985,6 +1080,45 @@ fun DialogoNuevaColeccion(
                     }
                 },
                 enabled = nombreColeccion.isNotBlank()
+            ) {
+                Text("Crear")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun DialogoNuevaPartitura(
+    onDismiss: () -> Unit,
+    onConfirmar: (String) -> Unit
+) {
+    var nombrePartitura by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Nueva Partitura") },
+        text = {
+            OutlinedTextField(
+                value = nombrePartitura,
+                onValueChange = { nombrePartitura = it },
+                label = { Text("Nombre de la nueva partitura") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (nombrePartitura.isNotBlank()) {
+                        onConfirmar(nombrePartitura.trim())
+                    }
+                },
+                enabled = nombrePartitura.isNotBlank()
             ) {
                 Text("Crear")
             }
@@ -1550,3 +1684,5 @@ fun SelectorDropdown(
         }
     }
 }
+
+

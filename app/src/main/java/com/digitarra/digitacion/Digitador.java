@@ -410,7 +410,7 @@ public class Digitador {
 		ConfiguracionManos posicionesManosMejor = digitacion_dedos_acordes_iter(posicionesMejor, esAcorde);
 
 		//rutaXMLSalida = context.getFilesDir().toString()+"MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml";
-		rutaXMLSalida = context.getFilesDir().toPath().resolve("MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml");
+		rutaXMLSalida = context.getFilesDir().toPath().resolve("MusicXML_Files/"+partitura.getNombre_partitura().replace(" ", "")+"digitado.xml");
 		JSONObject json_out = objetoDigitacionSalidaConAcordes(posicionesMejor, posicionesManosMejor, arrayNotas, esAcorde);
 		json_out.put("archivo_in", partitura.getPartitura_MusicXML().getRuta().toString());
 		json_out.put("archivo_out", rutaXMLSalida);
@@ -419,7 +419,7 @@ public class Digitador {
 
 		GeneradorPDF generadorPDF = new GeneradorPDF(context);
 
-		String rutaPDF = generadorPDF.obtenerPDF(rutaXMLSalida.toString(), context.getFilesDir().toPath().resolve("PDFs/"+partitura.getNombre_partitura()+"digitada.pdf").toString());
+		String rutaPDF = generadorPDF.obtenerPDF(rutaXMLSalida.toString(), context.getFilesDir().toPath().resolve("PDFs/"+partitura.getNombre_partitura().replace(" ", "")+"digitado.pdf").toString());
 
 
 
