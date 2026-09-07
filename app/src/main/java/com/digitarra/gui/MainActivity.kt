@@ -62,72 +62,8 @@ class MainActivity : ComponentActivity() {
                 // Variable de estado para forzar el redibujado de Compose al modificar la biblioteca
                 var refrescoKey by remember { mutableIntStateOf(0) }
 
-                var uriSeleccionada by remember {mutableStateOf<Uri?>(null)}
-
-                //val context = LocalContext.current
-
                 LaunchedEffect(biblioteca) {
                     bibliotecaInstancia = biblioteca
-                }
-
-                // Registrar el launcher para seleccionar archivos XML o MIDI
-                val filePickerLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.OpenDocument()
-                ) { uri: Uri? ->
-                    uriSeleccionada = uri
-//                    uri?.let {
-//                        try {
-//                            //val nombreOriginal = obtenerNombreArchivo(it)
-//                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
-//
-//
-//
-//                            Toast.makeText(
-//                                context,
-//                                "Generando PDF, por favor espera...",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//
-//                            val creadorPartituras = CreadorPartituras(this)
-//
-//                            lifecycleScope.launch {
-//
-//                                // Le pasas la URI directamente sin importar si es XML o MIDI
-//                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca)
-//
-//
-//
-//                                resultado.fold(
-//                                    onSuccess = {
-//                                        val temp = biblioteca
-//                                        biblioteca = null
-//                                        biblioteca = temp
-//                                        refrescoKey++
-//                                        pantallaActual = 1
-//                                        Toast.makeText(
-//                                            this@MainActivity,
-//                                            "Partitura añadida con éxito",
-//                                            Toast.LENGTH_SHORT
-//                                        ).show()
-//                                    },
-//                                    onFailure = { error ->
-//                                        Toast.makeText(
-//                                            this@MainActivity,
-//                                            "Error: ${error.message}",
-//                                            Toast.LENGTH_LONG
-//                                        ).show()
-//                                    }
-//                                )
-//                            }
-//                        } catch (e: Exception) {
-//                            e.printStackTrace()
-//                            Toast.makeText(
-//                                context,
-//                                "Error al procesar el archivo: ${e.message}",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
-//                    }
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -137,23 +73,10 @@ class MainActivity : ComponentActivity() {
                                 PantallaInicio(
                                     onComenzarClick = {
                                         try {
-//                                            val file = File(context.filesDir, "Partituras.json")
-//
-//                                            // Lee de la memoria interna si ya fue modificado, o del asset si es la primera vez
-//                                            val jsonContent = if (file.exists()) {
-//                                                file.readText()
-//                                            } else {
-//                                                context.assets.open("Biblioteca/Partituras.json")
-//                                                    .bufferedReader()
-//                                                    .use { it.readText() }
-//                                            }
-//
-//                                            val jsonObject = JSONObject(jsonContent)
                                             biblioteca = BibliotecaPartituras(context)
                                             pantallaActual = 1
                                         }
                                         catch (e: Exception) {
-                                            //e.printStackTrace()
                                             Toast.makeText(
                                                 context,
                                                 "Error al cargar la biblioteca: ${e.message}",
@@ -188,64 +111,66 @@ class MainActivity : ComponentActivity() {
                                         onAgregarPartiturasAColeccion = { seleccionadas ->
                                             coleccionActiva?.let { col ->
                                                 if (seleccionadas.isNotEmpty()) {
-                                                    // 1. Añadir partituras en Java y sincronizar JSONObject interno
+                                                    // 1. Añadir partituras en Java
                                                     biblioteca?.getColeccion(col.nombre)
                                                         ?.añadePartituras(seleccionadas)
 
-                                                    // 2. Escribir el JSONObject actualizado al archivo Partituras.json en disco
-                                                    //biblioteca?.guardarCambiosEnJson(context)
-
-                                                    // 3. IMPORTANTE: Recargar la instancia de la colección activa desde memoria
+                                                    // 2. Recargar la instancia de la colección activa desde memoria
                                                     coleccionActiva = biblioteca?.getColeccion(col.nombre)
 
-                                                    // 4. Redibujar Compose
+                                                    // 3. Redibujar
                                                     refrescoKey++
                                                 }
                                             }
                                         },
                                         onQuitarPartiturasDeColeccion = { partiturasAQuitar ->
                                             coleccionActiva?.let { col ->
-                                                // 1. Guardar cambios
-//                                                biblioteca?.quitarPartiturasDeColeccion(col.nombre, partiturasAQuitar)
+                                                // 1. Quitar partituras seleccionadas
                                                 col.quitarPartituras(partiturasAQuitar)
-//                                                biblioteca?.guardarCambiosEnJson(context)
 
                                                 // 2. Refrescar la referencia activa
                                                 coleccionActiva = biblioteca?.getColeccion(col.nombre)
 
-                                                // 3. Incrementar la clave de refresco
+                                                // 3. Redibujar
                                                 refrescoKey++
                                             }
                                         },
                                         onBorrarColeccion = { coleccion ->
+                                            // 1. Eliminar colección
                                             biblioteca?.eliminaColeccion(coleccion.nombre)
-//                                            biblioteca?.guardarCambiosEnJson(context)
+
+                                            // 2. Eliminar unica referencia que podría tener la colección borrada
                                             if (coleccionActiva == coleccion) coleccionActiva = null
                                             refrescoKey++
                                         },
 
                                         onVisualizarPartitura = { partitura ->
+                                            // 1. Toast de visualizando
                                             Toast.makeText(context, "Visualizando: ${partitura.nombre_partitura}", Toast.LENGTH_SHORT).show()
+
+                                            // 2. VisorPDF enseña la partitura en PDF
                                             val visualizador = VisorPDF(this@MainActivity)
                                             visualizador.visualizarPDF(partitura)
                                         },
                                         onDigitarPartitura = { partitura ->
+                                            // Toast de digitando
                                             Toast.makeText(context, "Digitando partitura, por favor espera...", Toast.LENGTH_SHORT).show()
 
-                                            lifecycleScope.launch(Dispatchers.IO) {
+                                            lifecycleScope.launch(Dispatchers.IO) { // IO ejecuta mientras main queda libre
                                                 try {
 
                                                     biblioteca?.digitaPartitura(partitura.nombre_partitura)
 
-                                                    withContext(Dispatchers.Main) {
+                                                    withContext(Dispatchers.Main) { // Main ejecuta
                                                         val temp = biblioteca
                                                         biblioteca = null
-                                                        biblioteca = temp
+                                                        biblioteca = temp // asegurarse de que se detectó el cambio en la biblio
 
-                                                        coleccionActiva?.let { col ->
+                                                        coleccionActiva?.let { col ->  // asegurarse de que se detectó el cambio en la coleccion si se está en una
                                                             coleccionActiva = biblioteca?.getColeccion(col.nombre)
                                                         }
 
+                                                        // Redibujar y toast de que se digitó con éxito
                                                         refrescoKey++
                                                         Toast.makeText(this@MainActivity, "Partitura digitada con éxito", Toast.LENGTH_SHORT).show()
                                                     }
@@ -260,7 +185,7 @@ class MainActivity : ComponentActivity() {
                                                             "No se pudo digitar: ${t.localizedMessage ?: "Error desconocido"}"
                                                     }
 
-                                                    withContext(Dispatchers.Main) {
+                                                    withContext(Dispatchers.Main) { // Main ejecuta
                                                         Toast.makeText(this@MainActivity, mensajeError, Toast.LENGTH_LONG).show()
                                                     }
                                                 }
@@ -269,54 +194,45 @@ class MainActivity : ComponentActivity() {
                                         onEditarPartitura = { partitura ->
                                             Toast.makeText(context, "Cargando datos de ${partitura.nombre_partitura}...", Toast.LENGTH_SHORT).show()
 
-                                            // 1. Asignamos la partitura seleccionada al estado
+                                            // 1. Asignar la partitura seleccionada al estado
                                             partituraAEditar = partitura
 
-                                            // 2. Cargamos las notas en segundo plano para no congelar la UI
+                                            // 2. Cargar las notas en segundo plano para no congelar la UI
                                             lifecycleScope.launch(Dispatchers.IO) {
                                                 try {
                                                     val digitaciones = biblioteca?.obtenerDigitacionesPartitura(partitura.nombre_partitura) ?: emptyList()
 
                                                     withContext(Dispatchers.Main) {
-                                                        // 3. Guardamos las digitaciones cargadas
+                                                        // 3. Guardar las digitaciones cargadas
                                                         listaDigitacionesAEditar = digitaciones
 
-                                                        // 4. Cambiamos el estado para navegar a la pantalla 3 (Edición)
+                                                        // 4. Cambiar a pantalla de edición
                                                         pantallaActual = 3
                                                     }
                                                 } catch (e: Exception) {
                                                     e.printStackTrace()
                                                     withContext(Dispatchers.Main) {
                                                         Toast.makeText(
-                                                            this@MainActivity,
-                                                            "Error al abrir edición: ${e.message}",
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
+                                                            this@MainActivity, "Error al abrir edición: ${e.message}", Toast.LENGTH_LONG).show()
                                                     }
                                                 }
                                             }
                                         },
                                         onEliminarPartitura = { partitura ->
-                                            // 1. Elimina archivos internos, HashMap y entradas del JSON
+                                            // 1. Elimina archivos internos y del hash
                                             biblioteca?.eliminaPartitura(partitura.nombre_partitura)
 
-                                            // 2. Persiste los cambios en el archivo Partituras.json en disco
-//                      biblioteca                      biblioteca?.guardarCambiosEnJson(context)
-
-                                            // 3. Si estábamos dentro de una colección, refrescamos su referencia en memoria
+                                            // 2. Si se está dentro de una colección, refrescar su referencia en memoria
                                             coleccionActiva?.quitarPartitura(partitura.nombre_partitura)
                                             coleccionActiva?.let { col ->
                                                 coleccionActiva = biblioteca?.getColeccion(col.nombre)
                                             }
 
-                                            // 4. Forzamos el redibujado de Compose
+                                            // 3. Redibujo
                                             refrescoKey++
 
                                             Toast.makeText(
-                                                context,
-                                                "Partitura \"${partitura.nombre_partitura}\" eliminada",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                                context, "Partitura \"${partitura.nombre_partitura}\" eliminada", Toast.LENGTH_SHORT).show()
                                         }
                                     )
                                 }
@@ -325,63 +241,35 @@ class MainActivity : ComponentActivity() {
                                 onVolverClick = { pantallaActual = 1 },
                                 onOpcion1Click = { /* Añadir por audio */ },
                                 onOpcion2Click = { nombre: String, uri: Uri?, context: Context ->
-//                                    // Tipos MIME filtrados para archivos XML y MIDI
-//                                    val mimeTypes = arrayOf(
-//                                        "text/xml",
-//                                        "application/xml",
-//                                        "audio/midi",
-//                                        "audio/x-midi"
-//                                    )
-//
-//                                    filePickerLauncher.launch(mimeTypes)
                                     uri?.let { uri ->
                                         try {
-                                            //val nombreOriginal = obtenerNombreArchivo(it)
-                                            //val extension = nombreOriginal.substringAfterLast(".").lowercase()
-                                            Toast.makeText(
-                                                context,
-                                                "Creando partitura, por favor espera...",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(context, "Creando partitura, por favor espera...", Toast.LENGTH_SHORT).show()
 
                                             val creadorPartituras = CreadorPartituras(context)
 
                                             lifecycleScope.launch {
 
-                                                // Le pasas la URI directamente sin importar si es XML o MIDI
-                                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca, nombre)
-
-
+                                                // Se pasa la URI directamente sin importar si es XML o MIDI
+                                                val resultado = creadorPartituras.procesarYGuardarPartitura(uri, biblioteca, nombre) // se mira si salio la creacion del pdf y puede que también de xml bien.
 
                                                 resultado.fold(
                                                     onSuccess = {
+                                                        // actu biblio, UI, toast
                                                         val temp = biblioteca
                                                         biblioteca = null
                                                         biblioteca = temp
                                                         refrescoKey++
                                                         pantallaActual = 1
-                                                        Toast.makeText(
-                                                            this@MainActivity,
-                                                            "Partitura añadida con éxito",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
+                                                        Toast.makeText(this@MainActivity, "Partitura añadida con éxito", Toast.LENGTH_SHORT).show()
                                                     },
                                                     onFailure = { error ->
-                                                        Toast.makeText(
-                                                            this@MainActivity,
-                                                            "Error: ${error.message}",
-                                                            Toast.LENGTH_LONG
-                                                        ).show()
+                                                        Toast.makeText(this@MainActivity, "Error: ${error.message}", Toast.LENGTH_LONG).show()
                                                     }
                                                 )
                                             }
                                         } catch (e: Exception) {
                                             e.printStackTrace()
-                                            Toast.makeText(
-                                                context,
-                                                "Error al procesar el archivo: ${e.message}",
-                                                Toast.LENGTH_LONG
-                                            ).show()
+                                            Toast.makeText(context, "Error al procesar el archivo: ${e.message}", Toast.LENGTH_LONG).show()
                                         }
                                     }
 
@@ -400,20 +288,11 @@ class MainActivity : ComponentActivity() {
 
                                             lifecycleScope.launch(Dispatchers.IO) {
                                                 try {
-                                                    // 1. Guarda los cambios en el archivo MusicXML a través del script de Python
-                                                    biblioteca?.actualizarDigitacionesMusicXML(
-                                                        partituraActual.nombre_partitura,
-                                                        nuevasDigitaciones
-                                                    )
-
-                                                    // 2. Si tu objeto partituraActual o tu ViewModel guarda las digitaciones,
-                                                    // actualiza la variable de estado local aquí.
-                                                    // Si las lees directamente del archivo XML al abrir la pantalla,
-                                                    // no necesitas asignar 'partituraActual.listaDigitaciones'.
+                                                    // Guardar los cambios en el archivo xml
+                                                    biblioteca?.actualizarDigitacionesMusicXML(partituraActual.nombre_partitura, nuevasDigitaciones)
 
                                                     withContext(Dispatchers.Main) {
                                                         Toast.makeText(this@MainActivity, "Guardado con éxito", Toast.LENGTH_SHORT).show()
-                                                        // Cambiar el valor del refresco fuerza a Jetpack Compose a releer los datos actualizados del XML/BD
                                                         refrescoKey++
                                                         pantallaActual = 1
                                                     }
@@ -436,13 +315,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Se ejecuta al MINIMIZAR la app (segundo plano)
+    // Al minimizar se dispara
     override fun onStop() {
         super.onStop()
         cerrarRecursos()
     }
 
-    // Se ejecuta al CERRAR por completo la app
+    // Al cerrar se dispara
     override fun onDestroy() {
         super.onDestroy()
         cerrarRecursos()
@@ -458,27 +337,27 @@ class MainActivity : ComponentActivity() {
 }
 
 // 0. Inicio
-@Composable
+@Composable // Elemento visual
 fun PantallaInicio(onComenzarClick: () -> Unit) {
-    Column(
+    Column( // Columna que se centre tod0 vertical y horizontalmente
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
+        Image( // Img logo Digitarra
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Logo de Digitarra",
             modifier = Modifier.size(256.dp)
         )
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
+        Text( // Texto digitarra
             text = "Digitarra",
             style = MaterialTheme.typography.headlineLarge,
             fontSize = 72.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(24.dp))
-        Button(
+        Button( // Boton comenzar
             onClick = onComenzarClick,
             modifier = Modifier
                 .width(280.dp)
@@ -765,14 +644,14 @@ fun ItemColeccion(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
+                .aspectRatio(1f) // objeto cuadrado
                 .clickable { menuExpandido = true },
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.primaryContainer // colr derivado del tema
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(
+            Column( // Contenido del cuadro de colección
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(12.dp),
@@ -1021,7 +900,6 @@ fun PantallaOpcionesAgregar(
                 }
 
                 Button(
-                    //onClick = onOpcion2Click,
                     onClick = {
                         val mimeTypes = arrayOf(
                             "text/xml",
@@ -1255,17 +1133,7 @@ fun DialogoQuitarPartiturasDeColeccion(
     )
 }
 
-
-
-
-
-
-
-
-
-
 // Editar partitura
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaEditarPartitura(
@@ -1332,17 +1200,9 @@ fun PantallaEditarPartitura(
 
                 itemsIndexed(estadoDigitaciones) { index, item ->
 
-                    var mostrarDialogoNota by remember {
-                        mutableStateOf(false)
-                    }
+                    var mostrarDialogoNota by remember {mutableStateOf(false)}
 
-                    /*
-                     * Separamos las notas.
-                     *
-                     * Ejemplo:
-                     * "do2" -> ["do2"]
-                     * "do2,mi2,sol2" -> ["do2", "mi2", "sol2"]
-                     */
+                    // separar notas por comas: do3,re3 -> [do3,re3]
                     val notas = item.nombreNota
                         .split(",")
                         .map { it.trim() }
@@ -1361,10 +1221,7 @@ fun PantallaEditarPartitura(
                                 .padding(12.dp)
                         ) {
 
-                            // -------------------------
-                            // CABECERA
-                            // -------------------------
-
+                            // Cabecera
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1391,10 +1248,7 @@ fun PantallaEditarPartitura(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // -------------------------
-                            // DIGITACIÓN
-                            // -------------------------
-
+                            // Digitación
                             notas.forEachIndexed { numeroNota, nota ->
 
                                 if (notas.size > 1) {
@@ -1508,10 +1362,7 @@ fun PantallaEditarPartitura(
                         }
                     }
 
-                    // -------------------------
-                    // DIÁLOGO PARA CAMBIAR NOTA
-                    // -------------------------
-
+                    // Diálogo cambiar nota
                     if (mostrarDialogoNota) {
 
                         var textoNota by remember {
@@ -1522,14 +1373,12 @@ fun PantallaEditarPartitura(
                             mutableStateOf<String?>(null)
                         }
 
-                        val numeroNotasEsperadas =
-                            notas.size
+                        val numeroNotasEsperadas = notas.size
 
                         AlertDialog(
                             onDismissRequest = {
                                 mostrarDialogoNota = false
                             },
-
                             title = {
                                 Text(
                                     if (numeroNotasEsperadas > 1)
@@ -1538,25 +1387,18 @@ fun PantallaEditarPartitura(
                                         "Modificar Nota"
                                 )
                             },
-
                             text = {
-
                                 OutlinedTextField(
                                     value = textoNota,
-
                                     onValueChange = {
                                         textoNota = it
                                         mensajeError = null
                                     },
-
                                     label = {
                                         Text("Alturas de la(s) nota(s)")
                                     },
-
                                     isError = mensajeError != null,
-
                                     supportingText = {
-
                                         if (mensajeError != null) {
                                             Text(
                                                 text = mensajeError!!,
@@ -1571,52 +1413,34 @@ fun PantallaEditarPartitura(
                                             )
                                         }
                                     },
-
                                     singleLine = true
                                 )
                             },
-
                             confirmButton = {
-
                                 Button(
                                     onClick = {
-
-                                        val textoLimpio =
-                                            textoNota
+                                        val textoLimpio = textoNota
                                                 .replace(" ", "")
                                                 .lowercase()
 
-                                        val listaNotasIngresadas =
-                                            textoLimpio.split(",")
+                                        val listaNotasIngresadas = textoLimpio.split(",")
 
-                                        val regexNotaIndividual =
-                                            Regex(
-                                                "(?i)^(do|re|mi|fa|sol|la|si)[#b♯♭]?[0-9]?$"
-                                            )
+                                        val regexNotaIndividual = Regex("(?i)^(do|re|mi|fa|sol|la|si)[#b♯♭]?[0-9]?$")
 
-                                        if (
-                                            listaNotasIngresadas.size !=
-                                            numeroNotasEsperadas
-                                        ) {
+                                        if (listaNotasIngresadas.size != numeroNotasEsperadas) {
 
-                                            mensajeError =
-                                                "Debes introducir exactamente $numeroNotasEsperadas notas separadas por comas."
+                                            mensajeError = "Debes introducir exactamente $numeroNotasEsperadas notas separadas por comas."
 
-                                        } else if (
-                                            !listaNotasIngresadas.all {
+                                        } else if (!listaNotasIngresadas.all {
                                                 regexNotaIndividual.matches(it)
                                             }
                                         ) {
 
-                                            mensajeError =
-                                                "Una o más notas tienen un formato inválido (Ej: do4,mi4,sol4)."
+                                            mensajeError = "Una o más notas tienen un formato inválido (Ej: do4,mi4,sol4)."
 
                                         } else {
 
-                                            estadoDigitaciones[index] =
-                                                item.copy(
-                                                    nombreNota = textoLimpio
-                                                )
+                                            estadoDigitaciones[index] = item.copy(nombreNota = textoLimpio)
 
                                             mostrarDialogoNota = false
                                         }
@@ -1644,7 +1468,7 @@ fun PantallaEditarPartitura(
     }
 }
 
-// SelectorDropdown actualizado para recibir el parámetro `enabled`
+// SelectorDropdown de edición de digitación
 @Composable
 fun SelectorDropdown(
     etiqueta: String,

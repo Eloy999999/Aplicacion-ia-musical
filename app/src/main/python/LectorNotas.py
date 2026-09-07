@@ -80,20 +80,13 @@ def obtener_digitacion_existente(elemento):
     cuerda = ""
     mano_derecha = ""
 
-    # -----------------------------------------
-    # Dedo izquierdo + traste
-    # -----------------------------------------
-
+    # Dedo izdo + traste
     for art in elemento.articulations:
 
-        if isinstance(
-                art,
-                music21.articulations.Fingering):
+        if isinstance(art,music21.articulations.Fingering):
 
             texto = str(art.fingerNumber).strip()
 
-            # Ejemplo:
-            # "2 V"
             partes = texto.split()
 
             if len(partes) >= 1:
@@ -102,10 +95,7 @@ def obtener_digitacion_existente(elemento):
             if len(partes) >= 2:
                 traste = partes[1]
 
-    # -----------------------------------------
-    # Cuerda + mano derecha
-    # -----------------------------------------
-
+        # Cuerda + dedo dcho
     if elemento.lyrics:
 
         texto = str(elemento.lyrics[0].text).strip()
@@ -118,33 +108,7 @@ def obtener_digitacion_existente(elemento):
         if len(partes) >= 2:
             mano_derecha = partes[1]
 
-    return (
-        dedo_izquierdo,
-        traste,
-        cuerda,
-        mano_derecha
-    )
-
-
-def obtener_nombre_elemento(elemento) -> str:
-    """Devuelve el nombre musical de un Note o Chord.
-
-    Note:
-        mi4
-
-    Chord:
-        do4,mi4,sol4
-    """
-    if isinstance(elemento, music21.note.Note):
-        return convertir_a_solfeggio(elemento.pitch)
-
-    if isinstance(elemento, music21.chord.Chord):
-        return ','.join(
-            convertir_a_solfeggio(p) for p in elemento.pitches
-        )
-
-    return ''
-
+    return (dedo_izquierdo, traste, cuerda, mano_derecha)
 
 def archivo_a_notas_legacy(nombre_archivo: str) -> list[str]:
     """
@@ -199,65 +163,6 @@ def archivo_a_notas_legacy(nombre_archivo: str) -> list[str]:
 
     return resultado
 
-
-def archivo_a_notas_detalladas(nombre_archivo: str) -> list[dict]:
-    """Devuelve información detallada para la aplicación Android.
-
-    Este formato NO lo utiliza Digitador.java directamente.
-
-    Ejemplo:
-
-    {
-        "id": "0",
-        "nombre": "mi4",
-        "compas": 1,
-        "dedoIzquierdo": "",
-        "cuerda": "",
-        "manoDerecha": ""
-    }
-    """
-
-    score = music21.converter.parse(nombre_archivo)
-
-    resultado = []
-
-    elementos = score.recurse().getElementsByClass(
-        [music21.note.Note, music21.chord.Chord]
-    )
-
-    for idx, elemento in enumerate(elementos):
-        # Evitamos duplicar las notas que están dentro de un Chord.
-        if isinstance(elemento, music21.note.Note):
-            if elemento.activeSite and isinstance(
-                elemento.activeSite, music21.chord.Chord
-            ):
-                continue
-
-        nombre = obtener_nombre_elemento(elemento)
-
-        if not nombre:
-            continue
-
-        compas = (
-            elemento.measureNumber
-            if elemento.measureNumber is not None
-            else 1
-        )
-
-        dedo, cuerda = obtener_digitacion_existente(elemento)
-
-        resultado.append({
-            'id': str(idx),
-            'nombre': nombre,
-            'compas': compas,
-            'dedoIzquierdo': dedo,
-            'cuerda': cuerda,
-            'manoDerecha': '',
-        })
-
-    return resultado
-
-
 def json_notas_legacy(ruta_archivo: str) -> str:
     """JSON compatible con Digitador.java.
 
@@ -297,10 +202,7 @@ def json_notas_detalladas(nombre_archivo: str) -> str:
             else 1
         )
 
-        # ==========================================
-        # NOTA SIMPLE
-        # ==========================================
-
+        # Nota
         if elemento.isNote:
 
             dedo, traste, cuerda, mano = \
@@ -326,10 +228,7 @@ def json_notas_detalladas(nombre_archivo: str) -> str:
                 "manoDerecha": mano
             })
 
-        # ==========================================
-        # ACORDE
-        # ==========================================
-
+        # Acorde
         elif elemento.isChord:
 
             # EXACTAMENTE EL MISMO ORDEN QUE
@@ -372,28 +271,18 @@ def json_notas_detalladas(nombre_archivo: str) -> str:
                 cuerda = ""
                 mano = ""
 
-                # ------------------------------
                 # Fingering
-                # ------------------------------
-
                 if i < len(lineas_fingering):
 
                     partes = (
-                        lineas_fingering[i]
-                        .split()
-                    )
+                        lineas_fingering[i].split())
 
                     if len(partes) >= 1:
                         dedo = partes[0]
 
                     if len(partes) >= 2:
-                        traste = romano_a_entero(
-                            partes[1]
-                        )
-
-                # ------------------------------
+                        traste = romano_a_entero(partes[1])
                 # Lyric
-                # ------------------------------
 
                 if i < len(lineas_lyrics):
 
@@ -411,10 +300,6 @@ def json_notas_detalladas(nombre_archivo: str) -> str:
                         mano = partes[1]
 
                 resultado.append({
-
-                    # MUY IMPORTANTE:
-                    # E5N0, E5N1, E5N2 pertenecen
-                    # al mismo acorde.
                     "id": (
                         f"E{indice_elemento}N{i}"
                     ),
@@ -527,10 +412,7 @@ def leer_digitacion_elemento(elemento):
    cuerda = ""
    mano_derecha = ""
 
-   # -----------------------------------------
    # Fingering
-   # -----------------------------------------
-
    for art in elemento.articulations:
 
        if isinstance(
@@ -552,10 +434,8 @@ def leer_digitacion_elemento(elemento):
                if len(partes) >= 2:
                    traste = romano_a_entero(partes[1])
 
-   # -----------------------------------------
-   # Lyric
-   # -----------------------------------------
 
+   # Lyric
    if elemento.lyrics:
 
        texto = str(
@@ -572,9 +452,4 @@ def leer_digitacion_elemento(elemento):
        if len(partes) >= 2:
            mano_derecha = partes[1]
 
-   return (
-       dedo,
-       traste,
-       cuerda,
-       mano_derecha
-   )
+   return (dedo, traste, cuerda, mano_derecha)

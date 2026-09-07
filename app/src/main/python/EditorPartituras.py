@@ -4,9 +4,7 @@ import xml.etree.ElementTree as ET
 import music21
 import os
 
-# ============================================================
-# MAPAS
-# ============================================================
+#Mapas
 
 MAPA_ROMANOS = {
     0: "0",
@@ -51,12 +49,7 @@ MAPA_SOLFEGO_A_INGLES = {
     "si": "B",
 }
 
-
-# ============================================================
-# FUNCIONES AUXILIARES
-# ============================================================
-
-
+    # Funciones auxiliares
 def entero_a_romano(num):
     try:
         val = int(num)
@@ -154,12 +147,6 @@ def remover_nombres_e_instrucciones_pantalla(ruta_xml):
 
     tree.write(ruta_xml, encoding="UTF-8", xml_declaration=True)
 
-
-# ============================================================
-# IDENTIFICAR LOS IDs
-# ============================================================
-
-
 def obtener_id_elemento(id_nota):
     """Convierte:
 
@@ -194,16 +181,7 @@ def obtener_indice_nota(id_nota):
 
     return int(match.group(2))
 
-
-# ============================================================
-# EDITAR UNA NOTA SIMPLE
-# ============================================================
-
-
 def aplicar_digitacion_nota(nota, datos):
-    # --------------------------------------------------------
-    # Altura
-    # --------------------------------------------------------
 
     nombre = datos.get("nombreNota", "").strip()
 
@@ -214,10 +192,6 @@ def aplicar_digitacion_nota(nota, datos):
         except Exception as e:
             print(f"Error cambiando nota: {e}")
 
-    # --------------------------------------------------------
-    # Limpiar digitación anterior
-    # --------------------------------------------------------
-
     nota.articulations = [
         a
         for a in nota.articulations
@@ -225,10 +199,6 @@ def aplicar_digitacion_nota(nota, datos):
     ]
 
     nota.lyrics = []
-
-    # --------------------------------------------------------
-    # Nueva digitación
-    # --------------------------------------------------------
 
     dedo = datos.get("dedoIzquierdo", "")
 
@@ -252,10 +222,7 @@ def aplicar_digitacion_nota(nota, datos):
 
         nota.lyrics.append(lyric)
 
-
-# ============================================================
-# EDITAR PARTITURA
-# ============================================================
+    # Editar partitura
 
 
 def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
@@ -266,27 +233,7 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
 
         lista_digitaciones = cambios.get("digitaciones", [])
 
-        # ----------------------------------------------------
-        # Los elementos reales de la partitura.
-        #
-        # Un acorde cuenta como UN elemento.
-        # ----------------------------------------------------
-
-        elementos = [
-            el for el in score.recurse().notes if el.isNote or el.isChord
-        ]
-
-        # ----------------------------------------------------
-        # Agrupar los datos recibidos por elemento.
-        #
-        # Ejemplo:
-        #
-        # E8N0
-        # E8N1
-        # E8N2
-        #
-        # pasan al mismo acorde E8.
-        # ----------------------------------------------------
+        elementos = [el for el in score.recurse().notes if el.isNote or el.isChord]
 
         grupos = {}
 
@@ -309,72 +256,33 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
         for clave in grupos:
             grupos[clave].sort(key=lambda x: x[0])
 
-        # ====================================================
-        # RECORRER ELEMENTOS REALES
-        # ====================================================
-
+        # Recorrer los elementos
         for indice_elemento, elemento in enumerate(elementos):
             datos_elemento = grupos.get(indice_elemento, [])
 
             if not datos_elemento:
                 continue
 
-            # =================================================
-            # NOTA SIMPLE
-            # =================================================
-
+            # Nota
             if elemento.isNote:
                 datos = datos_elemento[0][1]
 
                 aplicar_digitacion_nota(elemento, datos)
 
-            # =================================================
-            # ACORDE
-            # =================================================
-
+            # Acorde
             elif elemento.isChord:
-                # ------------------------------------------------
-                # Orden de las notas:
-                #
-                # igual que en LectorNotas:
-                # aguda -> grave
-                # ------------------------------------------------
 
+                # Notas de agudas a graves
                 notas_acorde = sorted(
                     elemento.notes, key=lambda n: n.pitch, reverse=True
                 )
 
-                # ------------------------------------------------
-                # Datos recibidos:
-                #
-                # E8N0
-                # E8N1
-                # E8N2
-                #
-                # también están:
-                # aguda -> grave
-                # ------------------------------------------------
-
                 datos_acorde = [datos for _, datos in datos_elemento]
-
-                # ------------------------------------------------
-                # 1. CAMBIAR ALTURAS
-                #
-                # Modificamos TODOS los pitches del acorde
-                # de una vez.
-                # ------------------------------------------------
 
                 nuevos_pitches = list(elemento.pitches)
 
-                # El acorde de music21 normalmente está
-                # de grave -> aguda.
-                #
-                # Nuestros datos están de aguda -> grave.
                 nombres_grave_aguda = list(
-                    reversed([
-                        datos.get("nombreNota", "").strip()
-                        for datos in datos_acorde
-                    ])
+                    reversed([datos.get("nombreNota", "").strip()for datos in datos_acorde])
                 )
 
                 for i, nombre in enumerate(nombres_grave_aguda):
@@ -385,18 +293,9 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
                         except Exception as e:
                             print(f"Error cambiando pitch del acorde: {e}")
 
-                # ------------------------------------------------
-                # MUY IMPORTANTE:
-                #
-                # Asignamos todos los pitches al Chord junto.
-                # ------------------------------------------------
-
                 elemento.pitches = tuple(nuevos_pitches)
 
-                # ------------------------------------------------
-                # 2. BORRAR DIGITACIÓN ANTERIOR
-                # ------------------------------------------------
-
+                # Borrar digitación anterior
                 elemento.articulations = [
                     a
                     for a in elemento.articulations
@@ -404,13 +303,6 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
                 ]
 
                 elemento.lyrics = []
-
-                # ------------------------------------------------
-                # 3. RECONSTRUIR EL FORMATO ORIGINAL
-                #
-                # Es EXACTAMENTE el formato que utiliza
-                # DigitarPartitura.py.
-                # ------------------------------------------------
 
                 arriba_partes = []
                 abajo_partes = []
@@ -432,10 +324,6 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
 
                     abajo_partes.append(t_aba)
 
-                # ------------------------------------------------
-                # Fingering
-                # ------------------------------------------------
-
                 if any(arriba_partes):
                     texto_arriba = "\n".join(arriba_partes)
 
@@ -445,10 +333,6 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
 
                     elemento.articulations.append(fingering)
 
-                # ------------------------------------------------
-                # Lyrics
-                # ------------------------------------------------
-
                 for numero_linea, texto in enumerate(abajo_partes, start=1):
                     if texto:
                         lyric = music21.note.Lyric(
@@ -456,10 +340,6 @@ def editar_partitura(ruta_xml: str, cambios_json_str: str) -> bool:
                         )
 
                         elemento.lyrics.append(lyric)
-
-        # ====================================================
-        # GUARDAR
-        # ====================================================
 
         score.write("musicxml", fp=ruta_xml)
 
