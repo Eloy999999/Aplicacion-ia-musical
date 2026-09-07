@@ -10,19 +10,21 @@ El proyecto se ha enfocado sobre todo en la especificación y el diseño de la a
 
 1. Instalar Android Studio. Disponible en: https://developer.android.com/studio?hl=es-419
 
-2. Si se necesita emular la ejecución de la aplicación desde el ordenador, descargar el emulador de móviles de Android Studio durante la instalación, con muchos modelos disponibles para emular. O, se puede descargar desde Tools -> Device Manager -> Add a new device (el “+” que hay en el panel derecho) -> Create virtual device.
+2. Instalar Python 3.11. Disponible en: https://www.python.org/downloads/
 
-3. El Android SDK (Kit de desarrollo software de Android), que, aunque se configure  de forma automática durante la instalación de Android Studio, se debe comprobar que se tiene Android SDK Platform 37, que se hace desde el proyecto al seleccionar Tools -> SDK Manager.
+3. Si se necesita emular la ejecución de la aplicación desde el ordenador, descargar el emulador de móviles de Android Studio durante la instalación, con muchos modelos disponibles para emular. O, se puede descargar desde Tools -> Device Manager -> Add a new device (el “+” que hay en el panel derecho) -> Create virtual device.
 
-4. El JDK (Kit de desarrollo software de Java) se recomienda utilizar el que viene instalado en la instalación de Android Studio, así se hizo para este proyecto.
+4. El Android SDK (Kit de desarrollo software de Android), que, aunque se configure  de forma automática durante la instalación de Android Studio, se debe comprobar que se tiene Android SDK Platform 37, que se hace desde el proyecto al seleccionar Tools -> SDK Manager.
 
-5. Instalar Git. Disponible en: https://git-scm.com/.
+5. El JDK (Kit de desarrollo software de Java) se recomienda utilizar el que viene instalado en la instalación de Android Studio, así se hizo para este proyecto.
 
-6. Clonar el repositorio: git clone https://github.com/Eloy999999/Aplicacion-ia-musical
+6. Instalar Git. Disponible en: https://git-scm.com/.
 
-7. Desde Android Studio seleccionar File -> Open...
+7. Clonar el repositorio: git clone https://github.com/Eloy999999/Aplicacion-ia-musical
 
-8. Seleccionar desde el buscador de archivos la carpeta donde se hizo el clonado del paso 6. Esto abrirá el proyecto en Android Studio.
+8. Desde Android Studio seleccionar File -> Open...
+
+9. Seleccionar desde el buscador de archivos la carpeta donde se hizo el clonado del paso 6. Esto abrirá el proyecto en Android Studio.
 
 ## Ejecución desde emulador de ordenador
 
