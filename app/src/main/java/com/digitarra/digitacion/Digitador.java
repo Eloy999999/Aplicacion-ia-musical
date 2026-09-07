@@ -211,41 +211,6 @@ public class Digitador {
 		
 	}
 	
-	
-	
-	private static final PosGuitarra[] cuerda_traste_do = {new PosGuitarra(2, 1), new PosGuitarra(5, 3),
-															new PosGuitarra(3, 5), new PosGuitarra(1, 8),
-															new PosGuitarra(6, 8), new PosGuitarra(4, 10)};
-	
-	private static final PosGuitarra[] cuerda_traste_re = {new PosGuitarra(4, 0), new PosGuitarra(2, 3),
-															new PosGuitarra(5, 5), new PosGuitarra(3, 7),
-															new PosGuitarra(1, 10), new PosGuitarra(6, 10),
-															new PosGuitarra(4, 12)};
-	
-	private static final PosGuitarra[] cuerda_traste_mi = {new PosGuitarra(1, 0), new PosGuitarra(6, 0),
-															new PosGuitarra(4, 2), new PosGuitarra(2, 5),
-															new PosGuitarra(5, 7), new PosGuitarra(3, 9),
-															new PosGuitarra(1, 12), new PosGuitarra(6, 12)};
-	
-	private static final PosGuitarra[] cuerda_traste_fa = {new PosGuitarra(1, 1), new PosGuitarra(6, 1),
-															new PosGuitarra(4, 3), new PosGuitarra(2, 6),
-															new PosGuitarra(5, 8), new PosGuitarra(3, 10)};
-	
-	private static final PosGuitarra[] cuerda_traste_sol = {new PosGuitarra(3, 0), new PosGuitarra(1, 3),
-															new PosGuitarra(6, 3), new PosGuitarra(4, 5),
-															new PosGuitarra(2, 8), new PosGuitarra(5, 10),
-															new PosGuitarra(3, 12)};
-	
-	private static final PosGuitarra[] cuerda_traste_la = {new PosGuitarra(5, 0), new PosGuitarra(3, 2),
-															new PosGuitarra(1, 5), new PosGuitarra(6, 5),
-															new PosGuitarra(4, 7), new PosGuitarra(2, 10),
-															new PosGuitarra(5, 12)};
-	
-	private static final PosGuitarra[] cuerda_traste_si = {new PosGuitarra(2, 0), new PosGuitarra(5, 2),
-															new PosGuitarra(3, 4), new PosGuitarra(1, 7),
-															new PosGuitarra(6, 7), new PosGuitarra(4, 9),
-															new PosGuitarra(2, 12)};
-	
 	private static final PosGuitarra[] cuerda_traste_do5 = {new PosGuitarra(1, 8), new PosGuitarra(2, 13), new PosGuitarra(3, 17)};
 	
 	private static final PosGuitarra[] cuerda_traste_do4 = {new PosGuitarra(2, 1), new PosGuitarra(3, 5), new PosGuitarra(4, 10), new PosGuitarra(5, 15)};
@@ -427,40 +392,6 @@ public class Digitador {
 
 		return new PartituraDigitada(partitura.getNombre_partitura() + " DIGITADO", Paths.get(rutaPDF), rutaXMLSalida);
 		
-	}
-	
-	
-	/**
-	 * Funcion que genera la mejor digitacion posible para una partitura dada, usando programación dinámica. SOLO TIENE EN CUENTA NOTAS, 
-	 * no funciona para acordes.
-	 * Una vez la calcula, llama al embajador para que haga las anotaciones en el archivo MusicXML
-	 * y devuelva la ruta del nuevo archivo MusicXML con la digitacion. Tras ello crea un nuevo objeto PartituraDigitada y lo devuelve.
-	 * @param partitura Partitura de guitarra que no ha sido digitada.
-	 * @return instancia de {@link PartituraDigitada} con la partitura digitada.
-	 */
-	public PartituraDigitada digita(Partitura partitura, Context context) throws NotaDesconocidaException, JSONException, IOException, InterruptedException {
-		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
-		Path rutaXMLSalida = context.getFilesDir().toPath().resolve("MusicXML_Files/"+partitura.getNombre_partitura()+"digitado.xml");
-		JSONObject json_in = embajador.getNotas(partitura.getPartitura_MusicXML().getRuta());
-		System.out.println("Se leyeron bien las notas");
-//		JSONObject json_out = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
-		
-		PosGuitarra[] cuerda_traste_mejor = digitacion_cuerda_traste_iter(json_in.getJSONArray("notas"));
-		
-		Dedo[] dedos_mejor = digitacion_dedos_iter(json_in.getJSONArray("notas"), cuerda_traste_mejor);
-		System.out.println("Se hizo la digitacion");
-		JSONObject infor_digit = this.objetoDigitacionSalida(cuerda_traste_mejor, dedos_mejor, 33, dedos_mejor.length, json_in.getJSONArray("notas"));
-		infor_digit.put("archivo_out", rutaXMLSalida.toString());
-		infor_digit.put("archivo_in", partitura.getPartitura_Midi().getRuta());
-		embajador.digitaPartitura(infor_digit);
-		
-		//TODO:Crear el pdf de la parittura
-//		String rutaPDF = GeneradorPDF.obtenerPDF(rutaXMLSalida.toString());
-		String rutaPDF = "PERE";
-		
-		PartituraDigitada resul = new PartituraDigitada(partitura.getNombre_partitura()+"_digitada", Paths.get(rutaPDF), rutaXMLSalida);
-		
-		return resul;
 	}
 	
 	
@@ -812,36 +743,6 @@ public class Digitador {
 			for(int j_ant = 0; j_ant < posibles_nota_ant.getNumConfigs(); j_ant++) {
 				for(int j_act = 0; j_act < posibles_nota_act.getNumConfigs(); j_act++) {
 					double costeAux = matrizManoIzquierda[i+1][j_act];
-//					if(tamRealAnt == 0 || tamRealAct == 0) {
-//
-//					}
-//					else {
-//						if (esAcorde[i - 1] && esAcorde[i]) {
-//							if(tamRealAct > 1) { //El actual sigue siendo acorde
-//								costeAux += costeAcordeIndividualManoIzq(posibles_nota_act.getPosibleAcorde(j_act), cuerda_traste_mejor[i].getConfigAcorde(),
-//										indexOrdenadosAct, tamRealesIzq[i]);
-//							}
-//
-//
-//							if(tamRealAnt > 1 && tamRealAct > 1) { //Ambos siguen siendo acordes
-//								costeAux += costeAcordeAcordeManoIzq(posibles_nota_ant.getPosibleAcorde(j_ant), posibles_nota_act.getPosibleAcorde(j_act),
-//										cuerda_traste_mejor[i - 1].getConfigAcorde(), cuerda_traste_mejor[i].getConfigAcorde(),
-//										tamRealesIzq[i - 1], indexOrdenadosAnt);
-//							}
-//							else if(tamRealAnt == 1 && tamRealAct > 1) { //El anterior ahora es una nota pero el actual sigue siendo acorde
-//								int diffAnt = cuerda_traste_mejor[i-1].getTamAcorde() - tamRealAnt;
-//								PosGuitarra posValidaAnt = cuerda_traste_mejor[i-1].getConfigAcorde()[indexOrdenadosAnt[diffAnt]];
-//								int dedoAnt = posibles_nota_ant.getPosibleAcorde(j_ant)[indexOrdenadosAnt[diffAnt]];
-//								costeAux += costeNotaAcordeManoIzq(dedoAnt, posibles_nota_act.getPosibleAcorde(j_act), posValidaAnt, cuerda_traste_mejor[i].getConfigAcorde(),
-//																	tamRealAct, indexOrdenadosAct);
-//							}
-//							else if(tamRealAnt > 1 && tamRealAct == 1) {
-//								int diffAct = cuerda_traste_mejor[i].getTamAcorde() - tamRealAct;
-//								PosGuitarra posValidaAct = cuerda_traste_mejor[i].getConfigAcorde()[indexOrdenadosAct[diffAct]];
-//								int dedoAct = posibles_nota_act.getPosibleAcorde(j_act)[indexOrdenadosAct[diffAct]];
-//								costeAux += costeAcordeNotaManoIzq()
-//							}
-//						}
 					if(tamRealAnt != 0 && tamRealAct != 0) {
 						if(esAcorde[i-1] && esAcorde[i]) {
 							costeAux += costeAcordeAcordeManoIzq(posibles_nota_ant.getPosibleAcorde(j_ant), posibles_nota_act.getPosibleAcorde(j_act),
@@ -1095,19 +996,6 @@ public class Digitador {
 	private int costeNotaAcordeManoDer(int dedoAnt, int[] dedosSig, PosGuitarra posNotaAnt, PosGuitarra[] posicionesAcordeSig, int tamRealAcordeSig) {
 		int longitudAcorde = posicionesAcordeSig.length;
 
-
-//		int[] cuerdasNaturales = new int[longitudAcorde];
-		
-//		for(int i = 0; i < longitudAcorde; i++) {
-//			cuerdasNaturales[i] = calculo_cuerda_dedo_der(dedoAnt, dedosSig[i], posNotaAnt);
-//		}
-//
-//		int resul = 0;
-//
-//		for(int i = 0; i < longitudAcorde; i++) {
-//			resul += Math.abs(cuerdasNaturales[i] - posicionesAcordeSig[i].getCuerda());
-//		}
-
 		HashMap<Integer, List<Integer>> indexCuerdas = new HashMap<>();
 		List<Integer> cuerdas = new ArrayList<>(tamRealAcordeSig);
 		for(int i = 0; i < longitudAcorde; i++) {
@@ -1162,12 +1050,6 @@ public class Digitador {
 			}
 			cuerdas.sort(Collections.reverseOrder());
 			int indexDedoMasAlto = indexCuerdas.get(cuerdas.get(0)).get(0);
-//			int masAlto = Integer.MIN_VALUE;
-//			for(int i = 0; i < longitudAcorde; i++) {
-//				if(dedosAnt[i] > masAlto) {
-//					indexDedoMasAlto = i;
-//				}
-//			}
 			int cuerdaActDedoSig = calculo_cuerda_dedo_der(dedosAnt[indexDedoMasAlto], dedoSig, posicionesAcordeAnt[indexDedoMasAlto]);
 			return Math.abs(cuerdaActDedoSig - posNotaSig.getCuerda());
 		}
@@ -1176,10 +1058,7 @@ public class Digitador {
 
 	private int costeAcordeAcordeManoDer(int[] dedosAnt, int[] dedosSig, PosGuitarra[] posicionesAcordeAnt, PosGuitarra[] posicionesAcordeSig, int tamRealAcordeAnt, int tamRealAcordeSig) {
 		int resul = 0;
-		
-//		for(int i = 0; i < dedosSig.length; i++) {
-//			resul += costeAcordeNotaManoDer(dedosAnt, dedosSig[i], posicionesAcordeAnt, posicionesAcordeSig[i]);
-//		}
+
 		int longitudAcorde = posicionesAcordeSig.length;
 		HashMap<Integer, List<Integer>> indexCuerdas = new HashMap<>();
 		List<Integer> cuerdas = new ArrayList<>(tamRealAcordeSig);
@@ -1205,40 +1084,6 @@ public class Digitador {
 	}	
 
 	private int costeAcordeIndividualManoDer(int[] dedosAcorde, PosGuitarra[] posicionesAcorde, int tamReal) {
-
-
-//		int longitudAcorde = posicionesAcorde.length;
-//		int[] indicesOrdenados = new int[longitudAcorde];
-//		for(int i = 0; i < longitudAcorde; i++) {
-//			int contad = 0;
-//			for(int j = 0; j < longitudAcorde; j++) {
-//				if(posicionesAcorde[i].getCuerda() < posicionesAcorde[j].getCuerda()) {
-//					contad++;
-//				}
-//			}
-//			indicesOrdenados[contad] = i;
-//		}
-		
-//		//Calculamos posicion natural de la mano usando la posicion del dedo con el traste menor
-//		int[] cuerdaManoNatural = new int[longitudAcorde];
-//
-//		cuerdaManoNatural[0] = posicionesAcorde[indicesOrdenados[0]].getCuerda();
-//
-//		int indicePrimero = indicesOrdenados[0];
-//
-//		for(int i = 1; i < longitudAcorde; i++) {
-//			int indiceActual = indicesOrdenados[i];
-//			cuerdaManoNatural[i] = calculo_cuerda_dedo_der(dedosAcorde[indicePrimero], dedosAcorde[indiceActual], posicionesAcorde[indicePrimero]);
-//		}
-//
-//
-//		int resul = 0;
-//
-//		for(int i = 1; i < longitudAcorde; i++) {
-//			resul += Math.abs(cuerdaManoNatural[i] - posicionesAcorde[indicesOrdenados[i]].getCuerda());
-//		}
-
-
 		if(tamReal == 1) {
 			return 0;
 		}
@@ -1378,16 +1223,6 @@ public class Digitador {
 	
 	private double costeNotaAcordeManoIzq(int dedoAnt, int[] dedosSig, PosGuitarra posNotaAnt, PosGuitarra[] posicionesAcordeSig, int tamRealAcorde, int[] indicesOrdenados) {
 		int longitudAcorde = posicionesAcordeSig.length;
-//		int[] indicesOrdenados = new int[longitudAcorde];
-//		for(int i = 0; i < longitudAcorde; i++) {
-//			int contad = 0; //Contador de cuantas estan mas a la derecha de la nota i en trastes
-//			for(int j = 0; j < longitudAcorde; j++) {
-//				if(posicionesAcordeSig[i].getTraste() > posicionesAcordeSig[j].getTraste()) {
-//					contad++;
-//				}
-//			}
-//			indicesOrdenados[contad] = i; 
-//		}
 		if(posNotaAnt.getTraste() == 0) {
 			return 0;
 		}
@@ -1441,18 +1276,7 @@ public class Digitador {
 	}	
 
 	private double costeAcordeIndividualManoIzq(int[] dedosAcorde, PosGuitarra[] posicionesAcorde, int[] indicesOrdenados, int tamReal) {
-//		int longitudAcorde = posicionesAcorde.length;
-//		int[] indicesOrdenados = new int[longitudAcorde];
-//		for(int i = 0; i < longitudAcorde; i++) {
-//			int contad = 0; //Contador de cuantas estan mas a la derecha de la nota i en trastes
-//			for(int j = 0; j < longitudAcorde; j++) {
-//				if(posicionesAcorde[i].getTraste() > posicionesAcorde[j].getTraste()) {
-//					contad++;
-//				}
-//			}
-//			indicesOrdenados[contad] = i;
-//		}
-		
+
 		//Calculamos posicion natural de la mano usando la posicion del dedo con el traste menor
 		PosGuitarra[] posManoNatural = new PosGuitarra[posicionesAcorde.length];
 
@@ -1513,7 +1337,6 @@ public class Digitador {
 
 	private int[][] posiblesManoIzqAcorde(PosGuitarra[] configAcorde, int tamReal) {
 		int longitudAcorde = configAcorde.length;
-//		int longitudAcorde = tamReal;
 		int[][] resul = null;
 		
 		
@@ -1547,15 +1370,6 @@ public class Digitador {
 					n = POSIBLES_ACORDE_3_MANO_IZQ.length;
 					posibilidades = POSIBLES_ACORDE_3_MANO_IZQ;
 					resul = new int[n][longitudAcorde];
-//					for (int i = 0; i < longitudAcorde; i++) {
-//						int contad = 0; //Contador de cuantas estan mas a la izquierda de la nota i en trastes
-//						for (int j = 0; j < longitudAcorde; j++) {
-//							if (configAcorde[i].getTraste() > configAcorde[j].getTraste()) {
-//								contad++;
-//							}
-//						}
-//						indicesOrdenados[contad] = i;
-//					}
 					indicesOrdenados = calculaIndicesOrdenadosManoIzq(configAcorde);
 					for (int i = 0; i < n; i++) {
 						resul[i][indicesOrdenados[0]] = posibilidades[i][0];
@@ -1582,18 +1396,6 @@ public class Digitador {
 			}
 		}
 		else {
-//			indicesOrdenados = new int[longitudAcorde];
-//			int diff = configAcorde.length - tamReal;
-//			for (int i = 0; i < longitudAcorde; i++) {
-//				int contad = 0; //Contador de cuantas estan mas a la izquierda de la nota i en trastes
-//				PosGuitarra pos_i = configAcorde[i];
-//				for (int j = 0; j < longitudAcorde; j++) {
-//					if (pos_i.getTraste() > configAcorde[j].getTraste() || pos_i.getTraste() == configAcorde[j].getTraste() && pos_i.getCuerda() < configAcorde[j].getCuerda()) {
-//						contad++;
-//					}
-//				}
-//				indicesOrdenados[contad] = i;
-//			}
 			indicesOrdenados = calculaIndicesOrdenadosManoIzq(configAcorde);
 			int diff = configAcorde.length - tamReal;
 			switch (tamReal) {
@@ -1619,13 +1421,6 @@ public class Digitador {
 					n = POSIBLES_ACORDE_2_MANO_IZQ.length;
 					posibilidades = POSIBLES_ACORDE_2_MANO_IZQ;
 					resul = new int[n][longitudAcorde];
-//					if (configAcorde[0].getTraste() < configAcorde[1].getTraste()) {
-//						indexPrimeraPosicion = 0;
-//						indexSegundaPosicion = 1;
-//					} else {
-//						indexPrimeraPosicion = 1;
-//						indexSegundaPosicion = 0;
-//					}
 					for (int i = 0; i < n; i++) {
 						int ceros = 0;
 						while(ceros < diff) {
@@ -1650,9 +1445,6 @@ public class Digitador {
 						for(int j = diff; j < posibilidades[i].length; j++) {
 							resul[i][indicesOrdenados[j]] = posibilidades[i][j-diff];
 						}
-//						resul[i][indicesOrdenados[0]] = posibilidades[i][0];
-//						resul[i][indicesOrdenados[1]] = posibilidades[i][1];
-//						resul[i][indicesOrdenados[2]] = posibilidades[i][2];
 					}
 					break;
 
@@ -1793,40 +1585,10 @@ public class Digitador {
 	 * @return Posibles Posiciones donde tocar la nota dada.
 	 */
 	private PosGuitarra[] posiblesDigitaciones(String nota) throws NotaDesconocidaException{
-		
-		
-//		if(nota.equalsIgnoreCase("do")) {
-//			return cuerda_traste_do;
-//		}
-//		else if(nota.equalsIgnoreCase("re")) {
-//			return cuerda_traste_re;
-//		}
-//		else if(nota.equalsIgnoreCase("mi")) {
-//			return cuerda_traste_mi;
-//		}
-//		else if(nota.equalsIgnoreCase("fa")) {
-//			return cuerda_traste_fa;
-//		}
-//		else if(nota.equalsIgnoreCase("sol")) {
-//			return cuerda_traste_sol;
-//		}
-//		else if(nota.equalsIgnoreCase("la")) {
-//			return cuerda_traste_la;
-//		}
-//		else if(nota.equalsIgnoreCase("si")) {
-//			return cuerda_traste_si;
-//		}
-//		else {
-//			System.out.println("Esto no es una nota");
-//			return null;
-//		}
+
 		
 		
 		String notaAux = nota;
-//		String[] notas = nota.split(",");
-//		if(notas.length > 0) {
-//			notaAux = notas[0];
-//		}
 		boolean esBemol = notaAux.contains("-");
 		boolean esSostenido = notaAux.contains("#");
 		notaAux = notaAux.replace("-", "");
@@ -1922,14 +1684,12 @@ public class Digitador {
 		if(esBemol) {
 			resul = resul.clone();
 			for(int i = 0; i < resul.length; i++) {
-//				resul[i].setTraste(resul[i].getTraste()-1);
 				resul[i] = new PosGuitarra(resul[i].getCuerda(), resul[i].getTraste()-1);
 			}
 		}
 		else if(esSostenido) {
 			resul = resul.clone();
 			for(int i = 0; i < resul.length; i++) {
-//				resul[i].setTraste(resul[i].getTraste()+1);
 				resul[i] = new PosGuitarra(resul[i].getCuerda(), Math.min(NUM_TRASTES-1,resul[i].getTraste()+1));
 			}
 		}

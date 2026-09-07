@@ -10,7 +10,6 @@ import com.digitarra.digitacion.Digitador;
 import com.digitarra.digitacion.NotaDesconocidaException;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -145,7 +143,6 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasSinDigitar() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-//			if(!PartituraDigitada.class.isInstance(p)) {
 			if(!p.isDigitada()) {
 				resul.add(p);
 			}
@@ -166,7 +163,6 @@ public class BibliotecaPartituras {
 	public List<Partitura> getPartiturasDigitadas() {
 		List<Partitura> resul = new ArrayList<Partitura>(partituras.size());
 		for(Partitura p : partituras.values()) {
-//			if(PartituraDigitada.class.isInstance(p)) {
 			if(p.isDigitada()) {
 				resul.add(p);
 			}
@@ -177,7 +173,6 @@ public class BibliotecaPartituras {
 	public void eliminaPartituras(List<String> nombres) throws ArchivoNoSePudoBorrarException {
 		for(String nombre : nombres) {
 			Partitura p = partituras.get(nombre);
-//			p.eliminaArchivos();
 			File f = p.getRutaPDF().toFile();
 			boolean seElimino = f.delete();
 			if(!seElimino) {
@@ -195,7 +190,6 @@ public class BibliotecaPartituras {
 
 	public void eliminaPartitura(String nombrePartitura) throws ArchivoNoSePudoBorrarException, PartituraNoExisteException {
 		Partitura p = this.getPartitura(nombrePartitura);
-//			p.eliminaArchivos();
 		File f = p.getRutaPDF().toFile();
 		boolean seElimino = f.delete();
 		if(!seElimino) {
@@ -344,49 +338,11 @@ public class BibliotecaPartituras {
 		if(archivosTemporales != null) {
 			for(File f : archivosTemporales) {
 				if(f.isFile()) {
-					//throw new ArchivoNoSePudoBorrarException(f.getAbsoluteFile().getName());
 					f.delete();
 				}
 			}
 		}
 
-	}
-
-	public Partitura nuevaPartitura(Uri uri) throws IOException, NombrePartituraEnUsoException, ArchivoNoSePudoBorrarException {
-		String nombre = obtenerNombreDesdeUri(uri);
-		Path rutaArchivoAux = pathTemps.resolve(nombre);
-		try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-			if (inputStream == null) {
-				throw new IOException("No se pudo abrir el archivo origen.");
-			}
-
-			// Copia directa del Stream al Path de destino (reemplaza si ya existe)
-			Files.copy(inputStream, rutaArchivoAux, StandardCopyOption.REPLACE_EXISTING);
-		}
-
-
-
-		EmbajadorMusic21Python embajador = new EmbajadorMusic21Python(context);
-
-		String nombreSinExtension = nombre.substring(0, nombre.lastIndexOf("."));
-
-		Path pathXMLNuevo = pathXMLs.resolve(nombreSinExtension+".xml");
-
-		System.out.println(nombreSinExtension);
-
-		Path rutaXMLBueno = Paths.get(embajador.convierteAMusicXML(rutaArchivoAux, pathXMLNuevo));
-
-		//Path rutaPDF = Paths.get(generadorPDFs.obtenerPDF(rutaXMLBueno.toString()));
-		Path rutaPDF = Paths.get(generadorPDFs.obtenerPDF(rutaXMLBueno.toString(), pathPDFs.resolve(nombreSinExtension+".pdf").toString()));
-
-		Partitura part = new Partitura(nombreSinExtension, rutaPDF, rutaXMLBueno);
-		this.insertaPartitura(part);
-
-//		if(!rutaArchivoAux.toFile().delete()) {
-//			throw new ArchivoNoSePudoBorrarException(rutaArchivoAux.toString());
-//		}
-
-		return part;
 	}
 
 	private String obtenerNombreDesdeUri(Uri uri) {
@@ -414,12 +370,6 @@ public class BibliotecaPartituras {
 		}
 
 		return nombre;
-	}
-
-	public void digitar(Partitura part) throws NombrePartituraEnUsoException, NotaDesconocidaException, JSONException, IOException, InterruptedException {
-		Digitador digit = new Digitador();
-		Partitura partNueva = digit.digita(part, context);
-		this.insertaPartitura(partNueva);
 	}
 
 
